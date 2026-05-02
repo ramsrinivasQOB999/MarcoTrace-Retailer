@@ -32,56 +32,56 @@ import {
 import { setAuth, useAuth, ROLE_LABELS } from "@/lib/auth-store";
 import type { Role } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { roleHasAny, type Permission } from "@/lib/permissions";
 
 type NavItem = {
   title: string;
   url: string;
   icon: React.ElementType;
   exact?: boolean;
-  roles: Role[];
+  /** Visible if the user has ANY of these permissions. Empty = visible to all signed-in users. */
+  perms: Permission[];
 };
-
-const ALL: Role[] = ["agglomerate_admin", "store_admin", "employee", "customer"];
-const ADMIN: Role[] = ["agglomerate_admin", "store_admin"];
-const STAFF: Role[] = ["agglomerate_admin", "store_admin", "employee"];
 
 const groups: { label: string; items: NavItem[] }[] = [
   {
     label: "Main",
     items: [
-      { title: "Dashboard", url: "/app", icon: LayoutDashboard, exact: true, roles: ALL },
-      { title: "Profile", url: "/app/profile", icon: User, roles: ALL },
-      { title: "Store Admin", url: "/app/store-admin", icon: Settings, roles: ADMIN },
+      // Dashboard hidden from customers (they have no admin perms)
+      { title: "Dashboard", url: "/app", icon: LayoutDashboard, exact: true,
+        perms: ["stores.view", "skus.view", "inventory.view", "pos.use", "insights.view"] },
+      { title: "Profile", url: "/app/profile", icon: User, perms: [] },
+      { title: "Store Admin", url: "/app/store-admin", icon: Settings, perms: ["store_admin.view"] },
     ],
   },
   {
     label: "Operations",
     items: [
-      { title: "Stores", url: "/app/stores", icon: Store, roles: ADMIN },
-      { title: "SKUs", url: "/app/skus", icon: Boxes, roles: STAFF },
-      { title: "Purchases", url: "/app/purchases", icon: Truck, roles: STAFF },
-      { title: "Inventory", url: "/app/inventory", icon: Warehouse, roles: STAFF },
+      { title: "Stores", url: "/app/stores", icon: Store, perms: ["stores.view"] },
+      { title: "SKUs", url: "/app/skus", icon: Boxes, perms: ["skus.view"] },
+      { title: "Purchases", url: "/app/purchases", icon: Truck, perms: ["purchases.view"] },
+      { title: "Inventory", url: "/app/inventory", icon: Warehouse, perms: ["inventory.view"] },
     ],
   },
   {
     label: "Trading",
     items: [
-      { title: "POS", url: "/app/pos", icon: ShoppingCart, roles: STAFF },
-      { title: "Promotions", url: "/app/skus", icon: Tag, roles: ADMIN },
+      { title: "POS", url: "/app/pos", icon: ShoppingCart, perms: ["pos.use"] },
+      { title: "Promotions", url: "/app/skus", icon: Tag, perms: ["promotions.manage"] },
     ],
   },
   {
     label: "Finance",
     items: [
-      { title: "Insights", url: "/app/insights", icon: LineChart, roles: ADMIN },
-      { title: "Reports", url: "/app/reports", icon: FileBarChart, roles: ADMIN },
-      { title: "Billing", url: "/app/pos", icon: Receipt, roles: STAFF },
-      { title: "Settlement", url: "/app/reports", icon: Wallet, roles: ADMIN },
+      { title: "Insights", url: "/app/insights", icon: LineChart, perms: ["insights.view"] },
+      { title: "Reports", url: "/app/reports", icon: FileBarChart, perms: ["reports.view"] },
+      { title: "Billing", url: "/app/pos", icon: Receipt, perms: ["pos.use"] },
+      { title: "Settlement", url: "/app/reports", icon: Wallet, perms: ["settlement.view"] },
     ],
   },
   {
     label: "Customer",
-    items: [{ title: "Customer App", url: "/app/customer", icon: Smartphone, roles: ALL }],
+    items: [{ title: "Customer App", url: "/app/customer", icon: Smartphone, perms: ["customer.bills.view"] }],
   },
 ];
 
@@ -91,7 +91,10 @@ export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const user = useAuth();
   const navigate = useNavigate();
-  const role: Role = user?.role ?? "customer";
+  const role: Role | undefined = user?.role;
+
+  const isVisible = (item: NavItem) =>
+    item.perms.length === 0 ? true : roleHasAny(role, item.perms);
 
   const isActive = (url: string, exact?: boolean) =>
     exact ? path === url : path === url || path.startsWith(url + "/");
@@ -119,7 +122,7 @@ export function AppSidebar() {
 
       <SidebarContent className="text-white">
         {groups.map((g) => {
-          const items = g.items.filter((i) => i.roles.includes(role));
+          const items = g.items.filter(isVisible);
           if (!items.length) return null;
           return (
             <SidebarGroup key={g.label}>
@@ -163,18 +166,20 @@ export function AppSidebar() {
             </div>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="justify-start text-white hover:bg-white/15 hover:text-white"
-          onClick={() => {
-            setAuth(null);
-            navigate({ to: "/login" });
-          }}
-        >
-          <LogOut className="h-4 w-4" />
-          {!collapsed && <span className="ml-2">Sign out</span>}
-        </Button>
+        <div className="px-2 pb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-white hover:bg-white/15 hover:text-white"
+            onClick={() => {
+              setAuth(null);
+              navigate({ to: "/login" });
+            }}
+          >
+            <LogOut className="h-4 w-4" />
+            {!collapsed && <span className="ml-2">Sign out</span>}
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
