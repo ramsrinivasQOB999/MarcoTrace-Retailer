@@ -14,7 +14,7 @@ import { withPerm } from "@/components/with-perm";
 
 export const Route = createFileRoute("/app/inventory")({
   head: () => ({ meta: [{ title: "Inventory — Mercotrace" }] }),
-  component: InventoryPage,
+  component: withPerm("inventory.view", InventoryPage),
 });
 
 function InventoryPage() {

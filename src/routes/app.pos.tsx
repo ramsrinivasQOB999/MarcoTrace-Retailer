@@ -17,7 +17,7 @@ import { withPerm } from "@/components/with-perm";
 
 export const Route = createFileRoute("/app/pos")({
   head: () => ({ meta: [{ title: "POS — Mercotrace" }] }),
-  component: PosPage,
+  component: withPerm("pos.use", PosPage),
 });
 
 interface CartItem {

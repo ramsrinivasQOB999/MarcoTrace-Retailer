@@ -12,7 +12,7 @@ import { withPerm } from "@/components/with-perm";
 
 export const Route = createFileRoute("/app/reports")({
   head: () => ({ meta: [{ title: "Reports — Mercotrace" }] }),
-  component: ReportsPage,
+  component: withPerm("reports.view", ReportsPage),
 });
 
 function ReportsPage() {

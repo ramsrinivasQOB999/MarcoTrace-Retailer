@@ -20,7 +20,7 @@ import { withPerm } from "@/components/with-perm";
 
 export const Route = createFileRoute("/app/purchases")({
   head: () => ({ meta: [{ title: "Purchases & Inward — Mercotrace" }] }),
-  component: PurchasesPage,
+  component: withPerm("purchases.view", PurchasesPage),
 });
 
 const purchaseSchema = z.object({

@@ -18,7 +18,7 @@ import { withPerm } from "@/components/with-perm";
 
 export const Route = createFileRoute("/app/store-admin")({
   head: () => ({ meta: [{ title: "Store Admin — Mercotrace" }] }),
-  component: StoreAdminPage,
+  component: withPerm("store_admin.view", StoreAdminPage),
 });
 
 const employeeSchema = z.object({
