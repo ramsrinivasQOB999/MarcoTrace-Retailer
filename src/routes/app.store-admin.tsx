@@ -10,9 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { stores } from "@/lib/mock-data";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Printer, Scale, ShieldCheck, Trash2 } from "lucide-react";
+import { Plus, Printer, Scale, ShieldCheck, Trash2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { permissionsFor } from "@/lib/permissions";
+import { ROLE_LABELS } from "@/lib/auth-store";
+import type { Role } from "@/lib/mock-data";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { withPerm } from "@/components/with-perm";
 
