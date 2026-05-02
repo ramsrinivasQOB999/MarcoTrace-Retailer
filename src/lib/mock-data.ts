@@ -1,4 +1,4 @@
-// Mock data + cost engine for Mercotrace Retail Trade prototype
+// Mock data + cost engine for Mercotrace – Retail Platform prototype
 export type Role = "agglomerate_admin" | "store_admin" | "employee" | "customer";
 
 export interface Store {
