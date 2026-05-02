@@ -62,6 +62,7 @@ function StoresPage() {
         title="Stores"
         subtitle="Manage stores, agglomerations, and ownership approvals"
         actions={
+          <Can perm="stores.create">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button className="bg-brand-gradient text-primary-foreground hover:opacity-95">
@@ -123,6 +124,7 @@ function StoresPage() {
               </form>
             </DialogContent>
           </Dialog>
+          </Can>
         }
       />
 
