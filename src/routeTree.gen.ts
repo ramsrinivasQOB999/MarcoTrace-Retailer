@@ -9,38 +9,188 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppStoresRouteImport } from './routes/app.stores'
+import { Route as AppSkusRouteImport } from './routes/app.skus'
+import { Route as AppReportsRouteImport } from './routes/app.reports'
+import { Route as AppPurchasesRouteImport } from './routes/app.purchases'
+import { Route as AppPosRouteImport } from './routes/app.pos'
+import { Route as AppInventoryRouteImport } from './routes/app.inventory'
+import { Route as AppInsightsRouteImport } from './routes/app.insights'
+import { Route as AppCustomerRouteImport } from './routes/app.customer'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoresRoute = AppStoresRouteImport.update({
+  id: '/stores',
+  path: '/stores',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSkusRoute = AppSkusRouteImport.update({
+  id: '/skus',
+  path: '/skus',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPurchasesRoute = AppPurchasesRouteImport.update({
+  id: '/purchases',
+  path: '/purchases',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPosRoute = AppPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryRoute = AppInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInsightsRoute = AppInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCustomerRoute = AppCustomerRouteImport.update({
+  id: '/customer',
+  path: '/customer',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/app/customer': typeof AppCustomerRoute
+  '/app/insights': typeof AppInsightsRoute
+  '/app/inventory': typeof AppInventoryRoute
+  '/app/pos': typeof AppPosRoute
+  '/app/purchases': typeof AppPurchasesRoute
+  '/app/reports': typeof AppReportsRoute
+  '/app/skus': typeof AppSkusRoute
+  '/app/stores': typeof AppStoresRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/app/customer': typeof AppCustomerRoute
+  '/app/insights': typeof AppInsightsRoute
+  '/app/inventory': typeof AppInventoryRoute
+  '/app/pos': typeof AppPosRoute
+  '/app/purchases': typeof AppPurchasesRoute
+  '/app/reports': typeof AppReportsRoute
+  '/app/skus': typeof AppSkusRoute
+  '/app/stores': typeof AppStoresRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/app/customer': typeof AppCustomerRoute
+  '/app/insights': typeof AppInsightsRoute
+  '/app/inventory': typeof AppInventoryRoute
+  '/app/pos': typeof AppPosRoute
+  '/app/purchases': typeof AppPurchasesRoute
+  '/app/reports': typeof AppReportsRoute
+  '/app/skus': typeof AppSkusRoute
+  '/app/stores': typeof AppStoresRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/app/customer'
+    | '/app/insights'
+    | '/app/inventory'
+    | '/app/pos'
+    | '/app/purchases'
+    | '/app/reports'
+    | '/app/skus'
+    | '/app/stores'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/app/customer'
+    | '/app/insights'
+    | '/app/inventory'
+    | '/app/pos'
+    | '/app/purchases'
+    | '/app/reports'
+    | '/app/skus'
+    | '/app/stores'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/app/customer'
+    | '/app/insights'
+    | '/app/inventory'
+    | '/app/pos'
+    | '/app/purchases'
+    | '/app/reports'
+    | '/app/skus'
+    | '/app/stores'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +198,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/stores': {
+      id: '/app/stores'
+      path: '/stores'
+      fullPath: '/app/stores'
+      preLoaderRoute: typeof AppStoresRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/skus': {
+      id: '/app/skus'
+      path: '/skus'
+      fullPath: '/app/skus'
+      preLoaderRoute: typeof AppSkusRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/reports': {
+      id: '/app/reports'
+      path: '/reports'
+      fullPath: '/app/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/purchases': {
+      id: '/app/purchases'
+      path: '/purchases'
+      fullPath: '/app/purchases'
+      preLoaderRoute: typeof AppPurchasesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pos': {
+      id: '/app/pos'
+      path: '/pos'
+      fullPath: '/app/pos'
+      preLoaderRoute: typeof AppPosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/inventory': {
+      id: '/app/inventory'
+      path: '/inventory'
+      fullPath: '/app/inventory'
+      preLoaderRoute: typeof AppInventoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/insights': {
+      id: '/app/insights'
+      path: '/insights'
+      fullPath: '/app/insights'
+      preLoaderRoute: typeof AppInsightsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/customer': {
+      id: '/app/customer'
+      path: '/customer'
+      fullPath: '/app/customer'
+      preLoaderRoute: typeof AppCustomerRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCustomerRoute: typeof AppCustomerRoute
+  AppInsightsRoute: typeof AppInsightsRoute
+  AppInventoryRoute: typeof AppInventoryRoute
+  AppPosRoute: typeof AppPosRoute
+  AppPurchasesRoute: typeof AppPurchasesRoute
+  AppReportsRoute: typeof AppReportsRoute
+  AppSkusRoute: typeof AppSkusRoute
+  AppStoresRoute: typeof AppStoresRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCustomerRoute: AppCustomerRoute,
+  AppInsightsRoute: AppInsightsRoute,
+  AppInventoryRoute: AppInventoryRoute,
+  AppPosRoute: AppPosRoute,
+  AppPurchasesRoute: AppPurchasesRoute,
+  AppReportsRoute: AppReportsRoute,
+  AppSkusRoute: AppSkusRoute,
+  AppStoresRoute: AppStoresRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
