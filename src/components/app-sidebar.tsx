@@ -33,7 +33,8 @@ import { setAuth, useAuth, ROLE_LABELS } from "@/lib/auth-store";
 import type { Role } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { roleHasAny, type Permission } from "@/lib/permissions";
-import logoLockup from "@/assets/mercotrace-logo.png";
+import logoLockup from "@/assets/mercotrace-logo-light.png";
+import logoIcon from "@/assets/mercotrace-logo-dark.png";
 
 type NavItem = {
   title: string;
@@ -106,18 +107,17 @@ export function AppSidebar() {
       className="[&>div[data-sidebar=sidebar]]:bg-aero-sidebar [&>div[data-sidebar=sidebar]]:text-white [&>div[data-sidebar=sidebar]]:border-r-0"
     >
       <SidebarHeader className="border-b border-white/15">
-        <Link to="/app" className="flex items-center px-2 py-2" aria-label="Mercotrace home">
-          {collapsed ? (
-            <div className="h-9 w-9 rounded-xl grid place-items-center shadow-elev bg-white/15 backdrop-blur-md border border-white/25">
-              <img src={logoLockup} alt="" className="h-6 w-6 object-contain" />
-            </div>
-          ) : (
-            <img
-              src={logoLockup}
-              alt="Mercotrace — Smart Mandi Platform"
-              className="h-9 w-auto object-contain"
-            />
-          )}
+        <Link
+          to="/app"
+          className="flex items-center px-2 py-3 overflow-hidden"
+          aria-label="Mercotrace — Smart Mandi Platform"
+        >
+          <img
+            src={logoLockup}
+            alt="Mercotrace — Smart Mandi Platform"
+            className={collapsed ? "h-8 w-auto object-contain object-left" : "h-9 w-auto object-contain"}
+            style={collapsed ? { width: "32px" } : undefined}
+          />
         </Link>
       </SidebarHeader>
 
