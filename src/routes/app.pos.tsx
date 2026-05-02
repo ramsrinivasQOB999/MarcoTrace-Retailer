@@ -96,7 +96,7 @@ function PosPage() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <Card className="p-4 lg:col-span-3">
+        <Card className="glass-card p-4 lg:col-span-3">
           <div className="relative mb-3">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input className="pl-9" placeholder="Search products..." value={q} onChange={(e) => setQ(e.target.value)} />
@@ -135,7 +135,7 @@ function PosPage() {
           </div>
         </Card>
 
-        <Card className="p-4 lg:col-span-2 flex flex-col">
+        <Card className="glass-card p-4 lg:col-span-2 flex flex-col">
           <h3 className="font-semibold mb-2">Cart</h3>
           <div className="flex-1 overflow-y-auto -mx-4 px-4">
             {cart.length === 0 ? (

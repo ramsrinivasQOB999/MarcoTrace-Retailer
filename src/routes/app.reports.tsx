@@ -54,7 +54,7 @@ function ReportsPage() {
         </TabsList>
 
         <TabsContent value="daily">
-          <Card className="p-4 overflow-x-auto">
+          <Card className="glass-card p-4 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -81,7 +81,7 @@ function ReportsPage() {
         </TabsContent>
 
         <TabsContent value="health">
-          <Card className="p-4 overflow-x-auto">
+          <Card className="glass-card p-4 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -111,7 +111,7 @@ function ReportsPage() {
         </TabsContent>
 
         <TabsContent value="supplier">
-          <Card className="p-4 overflow-x-auto">
+          <Card className="glass-card p-4 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -134,7 +134,7 @@ function ReportsPage() {
         </TabsContent>
 
         <TabsContent value="store">
-          <Card className="p-4 overflow-x-auto">
+          <Card className="glass-card p-4 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>

@@ -35,7 +35,7 @@ const byStore = stores.map((s) => ({
 
 function Stat({ icon: Icon, label, value, hint, tone }: { icon: React.ElementType; label: string; value: string; hint?: string; tone?: "green" | "yellow" | "red" }) {
   return (
-    <Card className="p-5">
+    <Card className="glass-card p-5">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</div>
@@ -82,7 +82,7 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="p-5 lg:col-span-2">
+        <Card className="glass-card p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold">Revenue trend</h3>
@@ -108,7 +108,7 @@ function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="glass-card p-5">
           <h3 className="font-semibold mb-1">Revenue by store</h3>
           <p className="text-xs text-muted-foreground mb-4">Last 30 days</p>
           <div className="h-64">
@@ -125,7 +125,7 @@ function Dashboard() {
         </Card>
       </div>
 
-      <Card className="p-5">
+      <Card className="glass-card p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Lot health</h3>
           <Button variant="ghost" size="sm" asChild>

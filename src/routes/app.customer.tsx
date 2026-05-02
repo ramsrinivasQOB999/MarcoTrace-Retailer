@@ -15,7 +15,7 @@ function CustomerPage() {
     <>
       <PageHeader title="Customer mobile app" subtitle="Bills, payments, rewards & offers" />
 
-      <Card className="p-5 border-warning/30 bg-warning/5">
+      <Card className="glass-card p-5 border-warning/30 bg-warning/5">
         <div className="flex gap-3">
           <AlertTriangle className="h-5 w-5 text-warning-foreground shrink-0 mt-0.5" />
           <div className="text-sm">
@@ -60,7 +60,7 @@ function CustomerPage() {
           </div>
         </div>
 
-        <Card className="p-5 lg:col-span-2">
+        <Card className="glass-card p-5 lg:col-span-2">
           <h3 className="font-semibold mb-4">Active offers</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
