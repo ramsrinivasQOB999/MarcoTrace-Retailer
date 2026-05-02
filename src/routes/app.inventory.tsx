@@ -10,9 +10,11 @@ import { lots, stores, healthForLot, inr } from "@/lib/mock-data";
 import { StatusBadge } from "@/components/status-badge";
 import { Search } from "lucide-react";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/inventory")({
   head: () => ({ meta: [{ title: "Inventory — Mercotrace" }] }),
-  component: InventoryPage,
+  component: withPerm("inventory.view", InventoryPage),
 });
 
 function InventoryPage() {

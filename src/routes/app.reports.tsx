@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/reports")({
   head: () => ({ meta: [{ title: "Reports — Mercotrace" }] }),
-  component: ReportsPage,
+  component: withPerm("reports.view", ReportsPage),
 });
 
 function ReportsPage() {

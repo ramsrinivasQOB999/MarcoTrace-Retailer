@@ -10,13 +10,19 @@ import { Badge } from "@/components/ui/badge";
 import { stores } from "@/lib/mock-data";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Printer, Scale, ShieldCheck, Trash2 } from "lucide-react";
+import { Plus, Printer, Scale, ShieldCheck, Trash2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { permissionsFor } from "@/lib/permissions";
+import { ROLE_LABELS } from "@/lib/auth-store";
+import type { Role } from "@/lib/mock-data";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+import { withPerm } from "@/components/with-perm";
 
 export const Route = createFileRoute("/app/store-admin")({
   head: () => ({ meta: [{ title: "Store Admin — Mercotrace" }] }),
-  component: StoreAdminPage,
+  component: withPerm("store_admin.view", StoreAdminPage),
 });
 
 const employeeSchema = z.object({
@@ -57,6 +63,7 @@ function StoreAdminPage() {
           <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="devices">Devices</TabsTrigger>
           <TabsTrigger value="rbac">RBAC</TabsTrigger>
+          <TabsTrigger value="matrix">Permissions Matrix</TabsTrigger>
           <TabsTrigger value="agglomeration">Agglomeration</TabsTrigger>
           <TabsTrigger value="rules">Rules</TabsTrigger>
         </TabsList>
@@ -169,6 +176,51 @@ function StoreAdminPage() {
                 </div>
               ))}
             </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="matrix">
+          <Card className="glass-card p-5 sm:p-6 space-y-3 overflow-x-auto">
+            <p className="text-sm text-muted-foreground">
+              Authoritative role × permission matrix. Anything not checked is hidden in the UI and rejected by route guards.
+            </p>
+            {(() => {
+              const roles: Role[] = ["agglomerate_admin", "store_admin", "employee", "customer"];
+              const allPerms = Array.from(
+                new Set(roles.flatMap((r) => permissionsFor(r))),
+              ).sort();
+              return (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[220px]">Permission</TableHead>
+                      {roles.map((r) => (
+                        <TableHead key={r} className="text-center">{ROLE_LABELS[r]}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allPerms.map((p) => (
+                      <TableRow key={p}>
+                        <TableCell className="font-mono text-xs">{p}</TableCell>
+                        {roles.map((r) => {
+                          const has = permissionsFor(r).includes(p);
+                          return (
+                            <TableCell key={r} className="text-center">
+                              {has ? (
+                                <Check className="h-4 w-4 text-success inline-block" />
+                              ) : (
+                                <X className="h-4 w-4 text-muted-foreground/40 inline-block" />
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              );
+            })()}
           </Card>
         </TabsContent>
 

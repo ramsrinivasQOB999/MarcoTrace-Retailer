@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { setAuth, ROLE_LABELS } from "@/lib/auth-store";
 import type { Role } from "@/lib/mock-data";
+import { DEFAULT_ROUTE } from "@/lib/permissions";
 import { toast } from "sonner";
 import { ShieldCheck, Smartphone } from "lucide-react";
 import bgVeggies from "@/assets/login-veggies.jpg";
@@ -61,7 +62,7 @@ function LoginPage() {
     if (!pending) return;
     setAuth({ phone: pending.phone, role: pending.role, name: pending.name });
     toast.success("Welcome to Mercotrace");
-    navigate({ to: "/app" });
+    navigate({ to: DEFAULT_ROUTE[pending.role] });
   };
 
   return (

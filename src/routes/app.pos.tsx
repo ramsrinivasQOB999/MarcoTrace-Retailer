@@ -13,9 +13,11 @@ import { StatusBadge } from "@/components/status-badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/pos")({
   head: () => ({ meta: [{ title: "POS — Mercotrace" }] }),
-  component: PosPage,
+  component: withPerm("pos.use", PosPage),
 });
 
 interface CartItem {

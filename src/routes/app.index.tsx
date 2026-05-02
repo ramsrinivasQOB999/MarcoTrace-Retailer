@@ -16,6 +16,9 @@ import {
 } from "recharts";
 import { ArrowUpRight, IndianRupee, Boxes, AlertTriangle, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Navigate } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth-store";
+import { Can } from "@/components/can";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Dashboard — Mercotrace" }] }),
@@ -58,6 +61,9 @@ function Stat({ icon: Icon, label, value, hint, tone }: { icon: React.ElementTyp
 }
 
 function Dashboard() {
+  const user = useAuth();
+  if (user?.role === "customer") return <Navigate to="/app/customer" />;
+
   const totalRevenue = sales.reduce((s, x) => s + x.total, 0);
   const totalCapital = lots.reduce((s, l) => s + l.costPrice * l.remaining, 0);
   const atRisk = lots.filter((l) => healthForLot(l).tone !== "green").length;
@@ -68,9 +74,11 @@ function Dashboard() {
         title="Dashboard"
         subtitle="Real-time view across your agglomeration"
         actions={
-          <Button asChild className="bg-brand-gradient text-primary-foreground hover:opacity-95">
-            <Link to="/app/pos">New Sale</Link>
-          </Button>
+          <Can perm="pos.use">
+            <Button asChild className="bg-brand-gradient text-primary-foreground hover:opacity-95">
+              <Link to="/app/pos">New Sale</Link>
+            </Button>
+          </Can>
         }
       />
 

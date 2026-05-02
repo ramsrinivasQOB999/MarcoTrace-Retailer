@@ -15,10 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
+import { withPerm } from "@/components/with-perm";
+import { Can } from "@/components/can";
 
 export const Route = createFileRoute("/app/stores")({
   head: () => ({ meta: [{ title: "Stores — Mercotrace" }] }),
-  component: StoresPage,
+  component: withPerm("stores.view", StoresPage),
 });
 
 const storeSchema = z.object({
@@ -60,6 +62,7 @@ function StoresPage() {
         title="Stores"
         subtitle="Manage stores, agglomerations, and ownership approvals"
         actions={
+          <Can perm="stores.create">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button className="bg-brand-gradient text-primary-foreground hover:opacity-95">
@@ -121,6 +124,7 @@ function StoresPage() {
               </form>
             </DialogContent>
           </Dialog>
+          </Can>
         }
       />
 
