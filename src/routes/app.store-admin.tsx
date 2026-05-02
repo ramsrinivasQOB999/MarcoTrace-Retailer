@@ -63,6 +63,7 @@ function StoreAdminPage() {
           <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="devices">Devices</TabsTrigger>
           <TabsTrigger value="rbac">RBAC</TabsTrigger>
+          <TabsTrigger value="matrix">Permissions Matrix</TabsTrigger>
           <TabsTrigger value="agglomeration">Agglomeration</TabsTrigger>
           <TabsTrigger value="rules">Rules</TabsTrigger>
         </TabsList>
