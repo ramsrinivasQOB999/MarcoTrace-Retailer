@@ -16,6 +16,8 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/purchases")({
   head: () => ({ meta: [{ title: "Purchases & Inward — Mercotrace" }] }),
   component: PurchasesPage,

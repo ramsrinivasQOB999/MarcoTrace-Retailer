@@ -17,6 +17,8 @@ import { Plus, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/skus")({
   head: () => ({ meta: [{ title: "SKUs — Mercotrace" }] }),
   component: SKUsPage,

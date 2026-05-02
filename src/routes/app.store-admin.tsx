@@ -14,6 +14,8 @@ import { Plus, Printer, Scale, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/store-admin")({
   head: () => ({ meta: [{ title: "Store Admin — Mercotrace" }] }),
   component: StoreAdminPage,

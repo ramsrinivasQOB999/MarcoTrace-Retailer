@@ -5,6 +5,8 @@ import { lots, stores, healthForLot, inr } from "@/lib/mock-data";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 import { StatusBadge } from "@/components/status-badge";
 
+import { withPerm } from "@/components/with-perm";
+
 export const Route = createFileRoute("/app/insights")({
   head: () => ({ meta: [{ title: "Insights — Mercotrace" }] }),
   component: InsightsPage,
