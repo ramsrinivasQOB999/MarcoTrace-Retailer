@@ -1,0 +1,95 @@
+// Mercotrace Retailer — JHipster domain model aligned with frontend mock-data (stores, SKUs, lots, POS sales)
+application {
+  config {
+    baseName mercotraceRetailer
+    applicationType monolith
+    packageName com.mercotrace.retailer
+    authenticationType jwt
+    databaseType sql
+    devDatabaseType postgresql
+    prodDatabaseType postgresql
+    buildTool maven
+    serverPort 8080
+    clientFramework no
+    cacheProvider caffeine
+    enableHibernateCache true
+    enableSwaggerCodegen false
+    searchEngine no
+    serviceDiscoveryType no
+    reactive false
+    messageBroker false
+    testFrameworks []
+    enableTranslation false
+  }
+  entities Store, Sku, InventoryLot, Sale, SaleLine
+}
+
+enum StoreStatus {
+  ACTIVE,
+  PENDING,
+  SUSPENDED
+}
+
+enum PaymentMethod {
+  CASH,
+  UPI,
+  CARD
+}
+
+entity Store {
+  code String required unique
+  name String required
+  city String
+  agglomeration String
+  status StoreStatus required
+  owner String
+  phone String
+}
+
+entity Sku {
+  code String required unique
+  name String required
+  category String
+  hsn String
+  gst Integer
+  unit String
+  active Boolean
+  basePrice BigDecimal required
+}
+
+entity InventoryLot {
+  qty Integer required
+  remaining Integer required
+  costPrice BigDecimal required
+  sellPrice BigDecimal required
+  purchaseDate Instant required
+  expiryDate Instant required
+  supplier String
+  invoiceNo String
+}
+
+entity Sale {
+  billNo String required unique
+  date Instant required
+  total BigDecimal required
+  gst BigDecimal required
+  payment PaymentMethod required
+}
+
+entity SaleLine {
+  qty Integer required
+  price BigDecimal required
+}
+
+relationship ManyToOne {
+  InventoryLot{sku required} to Sku
+  InventoryLot{store required} to Store
+  Sale{store required} to Store
+  SaleLine{sale required} to Sale
+  SaleLine{sku required} to Sku
+}
+
+dto Store, Sku, InventoryLot, Sale, SaleLine with mapstruct
+service Store, Sku, InventoryLot, Sale with serviceClass
+service SaleLine with serviceClass
+pagination Store, Sku, InventoryLot, Sale with pagination

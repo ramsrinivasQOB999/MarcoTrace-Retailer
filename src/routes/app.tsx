@@ -36,7 +36,10 @@ function AppLayout() {
               <Button variant="ghost" size="icon" aria-label="Notifications">
                 <Bell className="h-4 w-4" />
               </Button>
-              <Link to="/app/profile" className="flex items-center gap-2 rounded-full pl-2 pr-1 py-1 hover:bg-white/40">
+              <Link
+                to="/app/profile"
+                className="flex items-center gap-2 rounded-full pl-2 pr-1 py-1 hover:bg-white/40"
+              >
                 <div className="hidden sm:block text-right leading-tight">
                   <div className="text-xs font-medium">{user?.name}</div>
                   <div className="text-[10px] text-muted-foreground">

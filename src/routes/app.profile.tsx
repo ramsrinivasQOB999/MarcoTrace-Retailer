@@ -20,7 +20,10 @@ export const Route = createFileRoute("/app/profile")({
 
 const profileSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(60),
-  phone: z.string().trim().regex(/^\+?\d{10,13}$/, "Enter a valid phone number"),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\+?\d{10,13}$/, "Enter a valid phone number"),
   email: z.string().trim().email("Invalid email").max(255).or(z.literal("")),
   address: z.string().trim().max(200).optional().or(z.literal("")),
 });
@@ -85,7 +88,10 @@ function ProfilePage() {
 
         <TabsContent value="account">
           <Card className="glass-card p-5 sm:p-6">
-            <form onSubmit={form.handleSubmit(onSave)} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form
+              onSubmit={form.handleSubmit(onSave)}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
               <div className="space-y-1.5">
                 <Label htmlFor="name">Full name</Label>
                 <Input id="name" {...form.register("name")} />
@@ -102,7 +108,12 @@ function ProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="you@store.com" {...form.register("email")} />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@store.com"
+                  {...form.register("email")}
+                />
                 {form.formState.errors.email && (
                   <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
                 )}
@@ -112,8 +123,15 @@ function ProfilePage() {
                 <Input id="address" placeholder="Street, City, PIN" {...form.register("address")} />
               </div>
               <div className="sm:col-span-2 flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => form.reset()}>Reset</Button>
-                <Button type="submit" className="bg-brand-gradient text-primary-foreground hover:opacity-95">Save changes</Button>
+                <Button type="button" variant="outline" onClick={() => form.reset()}>
+                  Reset
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-brand-gradient text-primary-foreground hover:opacity-95"
+                >
+                  Save changes
+                </Button>
               </div>
             </form>
           </Card>
@@ -142,7 +160,11 @@ function ProfilePage() {
             </div>
             <div className="flex items-center justify-between">
               <div className="text-sm">Active sessions</div>
-              <Button variant="outline" size="sm" onClick={() => toast.success("Other sessions signed out")}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.success("Other sessions signed out")}
+              >
                 Sign out other devices
               </Button>
             </div>

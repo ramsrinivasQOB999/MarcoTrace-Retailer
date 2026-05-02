@@ -8,10 +8,30 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { lots as seedLots, stores, skus, type Lot, inr } from "@/lib/mock-data";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -24,7 +44,12 @@ export const Route = createFileRoute("/app/purchases")({
 });
 
 const purchaseSchema = z.object({
-  invoiceNo: z.string().trim().min(3).max(20).regex(/^[A-Z0-9-]+$/i),
+  invoiceNo: z
+    .string()
+    .trim()
+    .min(3)
+    .max(20)
+    .regex(/^[A-Z0-9-]+$/i),
   supplier: z.string().trim().min(2).max(60),
   storeId: z.string().min(1, "Pick a store"),
   invoiceDate: z.string().min(1),
@@ -45,7 +70,9 @@ type PurchaseForm = z.infer<typeof purchaseSchema>;
 function PurchasesPage() {
   const [lots, setLots] = useState<Lot[]>(seedLots);
   const [open, setOpen] = useState(false);
-  const [usedInvoices, setUsedInvoices] = useState<Set<string>>(new Set(seedLots.map((l) => l.invoiceNo)));
+  const [usedInvoices, setUsedInvoices] = useState<Set<string>>(
+    new Set(seedLots.map((l) => l.invoiceNo)),
+  );
 
   const form = useForm<PurchaseForm>({
     resolver: zodResolver(purchaseSchema),
@@ -54,7 +81,15 @@ function PurchasesPage() {
       supplier: "",
       storeId: stores[0].id,
       invoiceDate: format(new Date(), "yyyy-MM-dd"),
-      items: [{ skuId: skus[0].id, qty: 1, costPrice: 0, sellPrice: 0, expiryDate: format(new Date(Date.now() + 30 * 86400000), "yyyy-MM-dd") }],
+      items: [
+        {
+          skuId: skus[0].id,
+          qty: 1,
+          costPrice: 0,
+          sellPrice: 0,
+          expiryDate: format(new Date(Date.now() + 30 * 86400000), "yyyy-MM-dd"),
+        },
+      ],
     },
   });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" });
@@ -83,7 +118,9 @@ function PurchasesPage() {
     });
     setLots((p) => [...newLots, ...p]);
     setUsedInvoices((p) => new Set(p).add(data.invoiceNo.toUpperCase()));
-    toast.success("Inward booked", { description: `${newLots.length} lot(s) created from ${data.invoiceNo}` });
+    toast.success("Inward booked", {
+      description: `${newLots.length} lot(s) created from ${data.invoiceNo}`,
+    });
     setOpen(false);
     form.reset();
   };
@@ -95,7 +132,9 @@ function PurchasesPage() {
       arr.push(l);
       map.set(l.invoiceNo, arr);
     });
-    return Array.from(map.entries()).sort((a, b) => (b[1][0].purchaseDate > a[1][0].purchaseDate ? 1 : -1));
+    return Array.from(map.entries()).sort((a, b) =>
+      b[1][0].purchaseDate > a[1][0].purchaseDate ? 1 : -1,
+    );
   }, [lots]);
 
   return (
@@ -111,25 +150,44 @@ function PurchasesPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader><DialogTitle>Capture purchase invoice</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle>Capture purchase invoice</DialogTitle>
+              </DialogHeader>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div className="space-y-1.5">
                     <Label>Invoice #</Label>
                     <Input className="uppercase" {...form.register("invoiceNo")} />
-                    {form.formState.errors.invoiceNo && <p className="text-xs text-destructive">{form.formState.errors.invoiceNo.message}</p>}
+                    {form.formState.errors.invoiceNo && (
+                      <p className="text-xs text-destructive">
+                        {form.formState.errors.invoiceNo.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label>Supplier</Label>
                     <Input {...form.register("supplier")} />
-                    {form.formState.errors.supplier && <p className="text-xs text-destructive">{form.formState.errors.supplier.message}</p>}
+                    {form.formState.errors.supplier && (
+                      <p className="text-xs text-destructive">
+                        {form.formState.errors.supplier.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label>Store</Label>
-                    <Select value={form.watch("storeId")} onValueChange={(v) => form.setValue("storeId", v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    <Select
+                      value={form.watch("storeId")}
+                      onValueChange={(v) => form.setValue("storeId", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        {stores.map((s) => <SelectItem key={s.id} value={s.id}>{s.code} — {s.name}</SelectItem>)}
+                        {stores.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.code} — {s.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -142,20 +200,44 @@ function PurchasesPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>Line items</Label>
-                    <Button type="button" variant="outline" size="sm"
-                      onClick={() => append({ skuId: skus[0].id, qty: 1, costPrice: 0, sellPrice: 0, expiryDate: format(new Date(Date.now() + 30 * 86400000), "yyyy-MM-dd") })}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        append({
+                          skuId: skus[0].id,
+                          qty: 1,
+                          costPrice: 0,
+                          sellPrice: 0,
+                          expiryDate: format(new Date(Date.now() + 30 * 86400000), "yyyy-MM-dd"),
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-1" /> Add item
                     </Button>
                   </div>
                   <div className="space-y-2">
                     {fields.map((f, idx) => (
-                      <div key={f.id} className="grid grid-cols-12 gap-2 items-start rounded-lg border p-3">
+                      <div
+                        key={f.id}
+                        className="grid grid-cols-12 gap-2 items-start rounded-lg border p-3"
+                      >
                         <div className="col-span-12 sm:col-span-4 space-y-1">
                           <Label className="text-xs">SKU</Label>
-                          <Select value={form.watch(`items.${idx}.skuId`)} onValueChange={(v) => form.setValue(`items.${idx}.skuId`, v)}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
+                          <Select
+                            value={form.watch(`items.${idx}.skuId`)}
+                            onValueChange={(v) => form.setValue(`items.${idx}.skuId`, v)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent>
-                              {skus.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                              {skus.map((s) => (
+                                <SelectItem key={s.id} value={s.id}>
+                                  {s.name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -165,18 +247,31 @@ function PurchasesPage() {
                         </div>
                         <div className="col-span-4 sm:col-span-2 space-y-1">
                           <Label className="text-xs">Cost ₹</Label>
-                          <Input type="number" step="0.01" {...form.register(`items.${idx}.costPrice`)} />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...form.register(`items.${idx}.costPrice`)}
+                          />
                         </div>
                         <div className="col-span-4 sm:col-span-2 space-y-1">
                           <Label className="text-xs">MRP ₹</Label>
-                          <Input type="number" step="0.01" {...form.register(`items.${idx}.sellPrice`)} />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...form.register(`items.${idx}.sellPrice`)}
+                          />
                         </div>
                         <div className="col-span-9 sm:col-span-2 space-y-1">
                           <Label className="text-xs">Expiry</Label>
                           <Input type="date" {...form.register(`items.${idx}.expiryDate`)} />
                         </div>
                         <div className="col-span-12 flex justify-end">
-                          <Button type="button" size="icon" variant="ghost" onClick={() => fields.length > 1 && remove(idx)}>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => fields.length > 1 && remove(idx)}
+                          >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -186,8 +281,12 @@ function PurchasesPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit" className="bg-brand-gradient text-primary-foreground">Book inward</Button>
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="bg-brand-gradient text-primary-foreground">
+                    Book inward
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>

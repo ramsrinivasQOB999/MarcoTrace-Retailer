@@ -1,0 +1,38 @@
+{
+  "annotations": {
+    "changelogDate": "20260502103045"
+  },
+  "applications": ["mercotraceRetailer"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "qty",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "price",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "name": "SaleLine",
+  "relationships": [
+    {
+      "otherEntityName": "sale",
+      "relationshipName": "sale",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "otherEntityName": "sku",
+      "relationshipName": "sku",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

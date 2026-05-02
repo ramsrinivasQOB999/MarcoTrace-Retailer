@@ -5,10 +5,23 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { skus, lots, stores, inr, healthForLot } from "@/lib/mock-data";
 import { Plus, Minus, Search, Trash2, ShieldAlert, QrCode } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { StatusBadge } from "@/components/status-badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -32,13 +45,20 @@ function PosPage() {
   const [paid, setPaid] = useState<{ bill: string; total: number; gst: number } | null>(null);
 
   const filtered = useMemo(
-    () => skus.filter((s) => s.active && [s.code, s.name, s.category].join(" ").toLowerCase().includes(q.toLowerCase())),
+    () =>
+      skus.filter(
+        (s) =>
+          s.active &&
+          [s.code, s.name, s.category].join(" ").toLowerCase().includes(q.toLowerCase()),
+      ),
     [q],
   );
 
   const add = (skuId: string) => {
     // expiry guard: if every available lot for this SKU at this store is expired, block
-    const storeLots = lots.filter((l) => l.skuId === skuId && l.storeId === storeId && l.remaining > 0);
+    const storeLots = lots.filter(
+      (l) => l.skuId === skuId && l.storeId === storeId && l.remaining > 0,
+    );
     const sellable = storeLots.filter((l) => new Date(l.expiryDate) > new Date());
     if (storeLots.length === 0) {
       toast.error("Out of stock at this store");
@@ -56,7 +76,11 @@ function PosPage() {
   };
 
   const update = (skuId: string, delta: number) =>
-    setCart((p) => p.flatMap((i) => (i.skuId === skuId ? (i.qty + delta <= 0 ? [] : [{ ...i, qty: i.qty + delta }]) : [i])));
+    setCart((p) =>
+      p.flatMap((i) =>
+        i.skuId === skuId ? (i.qty + delta <= 0 ? [] : [{ ...i, qty: i.qty + delta }]) : [i],
+      ),
+    );
 
   const remove = (skuId: string) => setCart((p) => p.filter((i) => i.skuId !== skuId));
 
@@ -88,9 +112,15 @@ function PosPage() {
         actions={
           <div className="w-56">
             <Select value={storeId} onValueChange={setStoreId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {stores.map((s) => <SelectItem key={s.id} value={s.id}>{s.code} — {s.name}</SelectItem>)}
+                {stores.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.code} — {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -101,12 +131,22 @@ function PosPage() {
         <Card className="glass-card p-4 lg:col-span-3">
           <div className="relative mb-3">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Search products..." value={q} onChange={(e) => setQ(e.target.value)} />
+            <Input
+              className="pl-9"
+              placeholder="Search products..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {filtered.map((s) => {
-              const stock = lots.filter((l) => l.skuId === s.id && l.storeId === storeId).reduce((a, l) => a + l.remaining, 0);
-              const expired = lots.filter((l) => l.skuId === s.id && l.storeId === storeId).every((l) => new Date(l.expiryDate) <= new Date()) && stock > 0;
+              const stock = lots
+                .filter((l) => l.skuId === s.id && l.storeId === storeId)
+                .reduce((a, l) => a + l.remaining, 0);
+              const expired =
+                lots
+                  .filter((l) => l.skuId === s.id && l.storeId === storeId)
+                  .every((l) => new Date(l.expiryDate) <= new Date()) && stock > 0;
               return (
                 <button
                   key={s.id}
@@ -116,9 +156,13 @@ function PosPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="font-medium truncate">{s.name}</div>
-                      <div className="font-mono text-[10px] text-muted-foreground truncate">{s.code}</div>
+                      <div className="font-mono text-[10px] text-muted-foreground truncate">
+                        {s.code}
+                      </div>
                     </div>
-                    <StatusBadge tone={stock === 0 ? "red" : expired ? "red" : stock < 20 ? "yellow" : "green"}>
+                    <StatusBadge
+                      tone={stock === 0 ? "red" : expired ? "red" : stock < 20 ? "yellow" : "green"}
+                    >
                       {stock}
                     </StatusBadge>
                   </div>
@@ -163,18 +207,33 @@ function PosPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => update(c.skuId, -1)}>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-7 w-7"
+                              onClick={() => update(c.skuId, -1)}
+                            >
                               <Minus className="h-3 w-3" />
                             </Button>
                             <span className="w-6 text-center text-sm">{c.qty}</span>
-                            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => update(c.skuId, 1)}>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-7 w-7"
+                              onClick={() => update(c.skuId, 1)}
+                            >
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
                         <TableCell className="text-right">{inr(sku.basePrice * c.qty)}</TableCell>
                         <TableCell>
-                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => remove(c.skuId)}>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => remove(c.skuId)}
+                          >
                             <Trash2 className="h-3 w-3 text-destructive" />
                           </Button>
                         </TableCell>
@@ -186,10 +245,23 @@ function PosPage() {
             )}
           </div>
           <div className="border-t pt-3 mt-3 space-y-1.5 text-sm">
-            <div className="flex justify-between text-muted-foreground"><span>Subtotal (incl. GST)</span><span>{inr(totals.subtotal)}</span></div>
-            <div className="flex justify-between text-muted-foreground"><span>GST component</span><span>{inr(totals.gst)}</span></div>
-            <div className="flex justify-between font-semibold text-base"><span>Total</span><span>{inr(totals.total)}</span></div>
-            <Button className="w-full mt-2 bg-brand-gradient text-primary-foreground hover:opacity-95" disabled={cart.length === 0} onClick={checkout}>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Subtotal (incl. GST)</span>
+              <span>{inr(totals.subtotal)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>GST component</span>
+              <span>{inr(totals.gst)}</span>
+            </div>
+            <div className="flex justify-between font-semibold text-base">
+              <span>Total</span>
+              <span>{inr(totals.total)}</span>
+            </div>
+            <Button
+              className="w-full mt-2 bg-brand-gradient text-primary-foreground hover:opacity-95"
+              disabled={cart.length === 0}
+              onClick={checkout}
+            >
               Charge {inr(totals.total)}
             </Button>
           </div>
@@ -198,7 +270,9 @@ function PosPage() {
 
       <Dialog open={!!paid} onOpenChange={(v) => !v && setPaid(null)}>
         <DialogContent className="sm:max-w-sm">
-          <DialogHeader><DialogTitle>Payment received</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Payment received</DialogTitle>
+          </DialogHeader>
           {paid && (
             <div className="space-y-4 text-center">
               <div className="mx-auto h-32 w-32 rounded-lg border grid place-items-center bg-muted">
@@ -209,7 +283,9 @@ function PosPage() {
                 <div className="font-mono">{paid.bill}</div>
               </div>
               <div className="text-2xl font-semibold">{inr(paid.total)}</div>
-              <Button className="w-full" onClick={() => setPaid(null)}>Done</Button>
+              <Button className="w-full" onClick={() => setPaid(null)}>
+                Done
+              </Button>
             </div>
           )}
         </DialogContent>

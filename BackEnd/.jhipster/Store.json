@@ -1,0 +1,46 @@
+{
+  "annotations": {
+    "changelogDate": "20260502102645"
+  },
+  "applications": ["mercotraceRetailer"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique"]
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "city",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "agglomeration",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "StoreStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "ACTIVE,PENDING,SUSPENDED"
+    },
+    {
+      "fieldName": "owner",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "phone",
+      "fieldType": "String"
+    }
+  ],
+  "name": "Store",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

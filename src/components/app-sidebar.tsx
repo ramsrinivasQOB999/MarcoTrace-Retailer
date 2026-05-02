@@ -51,10 +51,20 @@ const groups: { label: string; items: NavItem[] }[] = [
     label: "Main",
     items: [
       // Dashboard hidden from customers (they have no admin perms)
-      { title: "Dashboard", url: "/app", icon: LayoutDashboard, exact: true,
-        perms: ["stores.view", "skus.view", "inventory.view", "pos.use", "insights.view"] },
+      {
+        title: "Dashboard",
+        url: "/app",
+        icon: LayoutDashboard,
+        exact: true,
+        perms: ["stores.view", "skus.view", "inventory.view", "pos.use", "insights.view"],
+      },
       { title: "Profile", url: "/app/profile", icon: User, perms: [] },
-      { title: "Store Admin", url: "/app/store-admin", icon: Settings, perms: ["store_admin.view"] },
+      {
+        title: "Store Admin",
+        url: "/app/store-admin",
+        icon: Settings,
+        perms: ["store_admin.view"],
+      },
     ],
   },
   {
@@ -84,7 +94,14 @@ const groups: { label: string; items: NavItem[] }[] = [
   },
   {
     label: "Customer",
-    items: [{ title: "Customer App", url: "/app/customer", icon: Smartphone, perms: ["customer.bills.view"] }],
+    items: [
+      {
+        title: "Customer App",
+        url: "/app/customer",
+        icon: Smartphone,
+        perms: ["customer.bills.view"],
+      },
+    ],
   },
 ];
 
@@ -122,7 +139,9 @@ export function AppSidebar() {
           <img
             src={logoLockup}
             alt="Mercotrace – Retail Platform"
-            className={collapsed ? "h-8 w-auto object-contain object-left" : "h-9 w-auto object-contain"}
+            className={
+              collapsed ? "h-8 w-auto object-contain object-left" : "h-9 w-auto object-contain"
+            }
             style={collapsed ? { width: "32px" } : undefined}
           />
         </Link>
@@ -184,14 +203,16 @@ export function AppSidebar() {
                 // Clear all client-side auth artifacts
                 setAuth(null);
                 if (typeof window !== "undefined") {
-                  try { sessionStorage.clear(); } catch { /* ignore */ }
+                  try {
+                    sessionStorage.clear();
+                  } catch {
+                    /* ignore */
+                  }
                   // Best-effort cookie clear (non-HttpOnly)
-                  document.cookie
-                    .split(";")
-                    .forEach((c) => {
-                      const name = c.split("=")[0]?.trim();
-                      if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
-                    });
+                  document.cookie.split(";").forEach((c) => {
+                    const name = c.split("=")[0]?.trim();
+                    if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
+                  });
                 }
                 toast.success("Signed out");
               } finally {

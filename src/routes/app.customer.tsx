@@ -21,8 +21,9 @@ function CustomerPage() {
           <div className="text-sm">
             <div className="font-medium">React Native app not included in this prototype</div>
             <div className="text-muted-foreground">
-              Lovable builds web applications. Below is a responsive web preview of the customer experience — the same
-              flows can be packaged into a native shell later, or used directly as a mobile-web PWA.
+              Lovable builds web applications. Below is a responsive web preview of the customer
+              experience — the same flows can be packaged into a native shell later, or used
+              directly as a mobile-web PWA.
             </div>
           </div>
         </div>
@@ -33,19 +34,29 @@ function CustomerPage() {
           {/* Phone frame */}
           <div className="rounded-[2.5rem] border-8 border-foreground/90 bg-background shadow-elev overflow-hidden">
             <div className="bg-brand-gradient text-primary-foreground p-5">
-              <div className="flex items-center gap-2 text-xs opacity-80"><Smartphone className="h-3 w-3" /> Mercotrace</div>
+              <div className="flex items-center gap-2 text-xs opacity-80">
+                <Smartphone className="h-3 w-3" /> Mercotrace
+              </div>
               <div className="mt-4">
                 <div className="text-xs opacity-80">Hello, Riya</div>
                 <div className="text-xl font-semibold">₹ 1,240 wallet</div>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="bg-white/15 rounded-lg p-2"><Wallet className="h-4 w-4 mx-auto mb-1" />Pay bill</div>
-                <div className="bg-white/15 rounded-lg p-2"><Gift className="h-4 w-4 mx-auto mb-1" />Rewards</div>
+                <div className="bg-white/15 rounded-lg p-2">
+                  <Wallet className="h-4 w-4 mx-auto mb-1" />
+                  Pay bill
+                </div>
+                <div className="bg-white/15 rounded-lg p-2">
+                  <Gift className="h-4 w-4 mx-auto mb-1" />
+                  Rewards
+                </div>
                 <div className="bg-white/15 rounded-lg p-2">★ 240 pts</div>
               </div>
             </div>
             <div className="p-4 space-y-3">
-              <div className="text-xs font-medium text-muted-foreground uppercase">Recent bills</div>
+              <div className="text-xs font-medium text-muted-foreground uppercase">
+                Recent bills
+              </div>
               {sales.slice(0, 3).map((s) => (
                 <div key={s.id} className="rounded-lg border p-3 flex justify-between items-center">
                   <div>
@@ -55,7 +66,9 @@ function CustomerPage() {
                   <div className="font-semibold">{inr(s.total)}</div>
                 </div>
               ))}
-              <Button className="w-full bg-brand-gradient text-primary-foreground">Scan & pay</Button>
+              <Button className="w-full bg-brand-gradient text-primary-foreground">
+                Scan & pay
+              </Button>
             </div>
           </div>
         </div>
@@ -70,7 +83,9 @@ function CustomerPage() {
               { title: "Festive bundle", desc: "Save ₹120 on grocery basket", tag: "Combo" },
             ].map((o) => (
               <div key={o.title} className="rounded-lg border p-4">
-                <div className="text-[10px] font-medium uppercase tracking-wide text-primary">{o.tag}</div>
+                <div className="text-[10px] font-medium uppercase tracking-wide text-primary">
+                  {o.tag}
+                </div>
                 <div className="font-medium mt-1">{o.title}</div>
                 <div className="text-xs text-muted-foreground">{o.desc}</div>
               </div>

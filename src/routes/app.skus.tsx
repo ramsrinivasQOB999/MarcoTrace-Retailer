@@ -9,12 +9,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { skus as seedSkus, type SKU, inr } from "@/lib/mock-data";
 import { StatusBadge } from "@/components/status-badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Plus, Search } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 import { withPerm } from "@/components/with-perm";
@@ -25,12 +45,35 @@ export const Route = createFileRoute("/app/skus")({
 });
 
 const skuSchema = z.object({
-  category: z.string().trim().min(3).max(3, "3 letters (e.g. FMC)").regex(/^[A-Z]+$/i),
-  type: z.string().trim().min(3).max(3, "3 letters").regex(/^[A-Z]+$/i),
-  group: z.string().trim().min(3).max(3, "3 letters").regex(/^[A-Z]+$/i),
-  pack: z.string().trim().min(3).max(3, "3 chars").regex(/^[A-Z0-9]+$/i),
+  category: z
+    .string()
+    .trim()
+    .min(3)
+    .max(3, "3 letters (e.g. FMC)")
+    .regex(/^[A-Z]+$/i),
+  type: z
+    .string()
+    .trim()
+    .min(3)
+    .max(3, "3 letters")
+    .regex(/^[A-Z]+$/i),
+  group: z
+    .string()
+    .trim()
+    .min(3)
+    .max(3, "3 letters")
+    .regex(/^[A-Z]+$/i),
+  pack: z
+    .string()
+    .trim()
+    .min(3)
+    .max(3, "3 chars")
+    .regex(/^[A-Z0-9]+$/i),
   name: z.string().trim().min(3).max(80),
-  hsn: z.string().trim().regex(/^\d{4,8}$/, "4–8 digit HSN"),
+  hsn: z
+    .string()
+    .trim()
+    .regex(/^\d{4,8}$/, "4–8 digit HSN"),
   gst: z.coerce.number().min(0).max(28),
   unit: z.string().trim().min(1).max(8),
   basePrice: z.coerce.number().min(0).max(1_000_000),
@@ -43,11 +86,24 @@ function SKUsPage() {
   const [open, setOpen] = useState(false);
   const form = useForm<SKUForm>({
     resolver: zodResolver(skuSchema),
-    defaultValues: { category: "FMC", type: "BEV", group: "JUI", pack: "500", name: "", hsn: "2202", gst: 18, unit: "btl", basePrice: 0 },
+    defaultValues: {
+      category: "FMC",
+      type: "BEV",
+      group: "JUI",
+      pack: "500",
+      name: "",
+      hsn: "2202",
+      gst: 18,
+      unit: "btl",
+      basePrice: 0,
+    },
   });
 
   const filtered = useMemo(
-    () => items.filter((s) => [s.code, s.name, s.category].join(" ").toLowerCase().includes(q.toLowerCase())),
+    () =>
+      items.filter((s) =>
+        [s.code, s.name, s.category].join(" ").toLowerCase().includes(q.toLowerCase()),
+      ),
     [items, q],
   );
 
@@ -88,34 +144,57 @@ function SKUsPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-xl">
-              <DialogHeader><DialogTitle>Create SKU</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle>Create SKU</DialogTitle>
+              </DialogHeader>
               <form onSubmit={form.handleSubmit(onAdd)} className="space-y-3">
                 <div className="grid grid-cols-4 gap-2">
                   {(["category", "type", "group", "pack"] as const).map((f) => (
                     <div key={f} className="space-y-1.5">
                       <Label className="capitalize">{f}</Label>
                       <Input maxLength={3} className="font-mono uppercase" {...form.register(f)} />
-                      {form.formState.errors[f] && <p className="text-xs text-destructive">{form.formState.errors[f]?.message}</p>}
+                      {form.formState.errors[f] && (
+                        <p className="text-xs text-destructive">
+                          {form.formState.errors[f]?.message}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Product name</Label>
                   <Input {...form.register("name")} />
-                  {form.formState.errors.name && <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>}
+                  {form.formState.errors.name && (
+                    <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="space-y-1.5">
                     <Label>HSN</Label>
                     <Input {...form.register("hsn")} />
-                    {form.formState.errors.hsn && <p className="text-xs text-destructive">{form.formState.errors.hsn.message}</p>}
+                    {form.formState.errors.hsn && (
+                      <p className="text-xs text-destructive">
+                        {form.formState.errors.hsn.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label>GST %</Label>
-                    <Select value={String(form.watch("gst"))} onValueChange={(v) => form.setValue("gst", Number(v), { shouldValidate: true })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    <Select
+                      value={String(form.watch("gst"))}
+                      onValueChange={(v) =>
+                        form.setValue("gst", Number(v), { shouldValidate: true })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        {[0, 5, 12, 18, 28].map((g) => <SelectItem key={g} value={String(g)}>{g}%</SelectItem>)}
+                        {[0, 5, 12, 18, 28].map((g) => (
+                          <SelectItem key={g} value={String(g)}>
+                            {g}%
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -126,12 +205,20 @@ function SKUsPage() {
                   <div className="space-y-1.5">
                     <Label>Base price (₹)</Label>
                     <Input type="number" step="0.01" {...form.register("basePrice")} />
-                    {form.formState.errors.basePrice && <p className="text-xs text-destructive">{form.formState.errors.basePrice.message}</p>}
+                    {form.formState.errors.basePrice && (
+                      <p className="text-xs text-destructive">
+                        {form.formState.errors.basePrice.message}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" type="button" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit" className="bg-brand-gradient text-primary-foreground">Create</Button>
+                  <Button variant="outline" type="button" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="bg-brand-gradient text-primary-foreground">
+                    Create
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -142,7 +229,12 @@ function SKUsPage() {
       <Card className="glass-card p-4">
         <div className="relative max-w-sm mb-3">
           <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search SKUs..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+          <Input
+            placeholder="Search SKUs..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="pl-9"
+          />
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -168,7 +260,9 @@ function SKUsPage() {
                     <StatusBadge tone="neutral">{s.gst}%</StatusBadge>
                   </TableCell>
                   <TableCell>{inr(s.basePrice)}</TableCell>
-                  <TableCell><Switch checked={s.active} onCheckedChange={() => toggle(s.id)} /></TableCell>
+                  <TableCell>
+                    <Switch checked={s.active} onCheckedChange={() => toggle(s.id)} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

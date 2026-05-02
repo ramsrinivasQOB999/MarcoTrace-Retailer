@@ -36,12 +36,26 @@ const byStore = stores.map((s) => ({
   revenue: 50000 + Math.round(Math.random() * 90000),
 }));
 
-function Stat({ icon: Icon, label, value, hint, tone }: { icon: React.ElementType; label: string; value: string; hint?: string; tone?: "green" | "yellow" | "red" }) {
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: "green" | "yellow" | "red";
+}) {
   return (
     <Card className="glass-card p-5">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {label}
+          </div>
           <div className="text-2xl font-semibold mt-1">{value}</div>
           {hint && <div className="text-xs text-muted-foreground mt-1">{hint}</div>}
         </div>
@@ -83,10 +97,32 @@ function Dashboard() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat icon={IndianRupee} label="Today's Revenue" value={inr(totalRevenue)} hint="across all stores" tone="green" />
-        <Stat icon={Boxes} label="Capital Locked" value={inr(totalCapital)} hint={`${lots.length} active lots`} />
-        <Stat icon={AlertTriangle} label="At-Risk Lots" value={String(atRisk)} hint="margin / expiry" tone={atRisk > 0 ? "yellow" : "green"} />
-        <Stat icon={Store} label="Active Stores" value={String(stores.filter((s) => s.status === "active").length)} hint={`of ${stores.length}`} />
+        <Stat
+          icon={IndianRupee}
+          label="Today's Revenue"
+          value={inr(totalRevenue)}
+          hint="across all stores"
+          tone="green"
+        />
+        <Stat
+          icon={Boxes}
+          label="Capital Locked"
+          value={inr(totalCapital)}
+          hint={`${lots.length} active lots`}
+        />
+        <Stat
+          icon={AlertTriangle}
+          label="At-Risk Lots"
+          value={String(atRisk)}
+          hint="margin / expiry"
+          tone={atRisk > 0 ? "yellow" : "green"}
+        />
+        <Stat
+          icon={Store}
+          label="Active Stores"
+          value={String(stores.filter((s) => s.status === "active").length)}
+          hint={`of ${stores.length}`}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -110,7 +146,13 @@ function Dashboard() {
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Area type="monotone" dataKey="revenue" stroke="#6C63FF" fill="url(#rev)" strokeWidth={2} />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#6C63FF"
+                  fill="url(#rev)"
+                  strokeWidth={2}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -144,9 +186,14 @@ function Dashboard() {
           {lots.slice(0, 6).map((l) => {
             const h = healthForLot(l);
             return (
-              <div key={l.id} className="rounded-lg border p-3 flex items-start justify-between gap-3">
+              <div
+                key={l.id}
+                className="rounded-lg border p-3 flex items-start justify-between gap-3"
+              >
                 <div className="min-w-0">
-                  <div className="font-mono text-xs text-muted-foreground truncate">{l.skuCode}</div>
+                  <div className="font-mono text-xs text-muted-foreground truncate">
+                    {l.skuCode}
+                  </div>
                   <div className="font-medium truncate">{l.invoiceNo}</div>
                   <div className="text-xs text-muted-foreground">
                     {l.remaining}/{l.qty} units · expires in {h.daysToExpiry}d

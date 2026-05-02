@@ -1,6 +1,13 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 30_000, retry: 1 },
+  },
+});
 
 function NotFoundComponent() {
   return (
@@ -30,7 +37,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Mercotrace – Retail Platform" },
-      { name: "description", content: "Mercotrace – Retail Platform: multi-store inventory & POS, lot tracking, GST billing, expiry & margin alerts." },
+      {
+        name: "description",
+        content:
+          "Mercotrace – Retail Platform: multi-store inventory & POS, lot tracking, GST billing, expiry & margin alerts.",
+      },
       { name: "author", content: "Mercotrace" },
       { property: "og:title", content: "Mercotrace – Retail Platform" },
       { property: "og:description", content: "Multi-store retail inventory & POS." },
@@ -64,5 +75,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Outlet />
+    </QueryClientProvider>
+  );
 }

@@ -6,4 +6,15 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig();
+export default defineConfig({
+  vite: {
+    server: {
+      port: 5173,
+      // Browser calls /api on the dev server; forward to Spring Boot (port must match application-dev.yml).
+      proxy: {
+        "/api": { target: "http://127.0.0.1:8090", changeOrigin: true },
+        "/management": { target: "http://127.0.0.1:8090", changeOrigin: true },
+      },
+    },
+  },
+});

@@ -6,6 +6,9 @@ export interface AuthUser {
   phone: string;
   role: Role;
   name: string;
+  /** Set when signing in via JHipster (`/api/authenticate`). */
+  accessToken?: string;
+  login?: string;
 }
 
 const KEY = "mercotrace_auth";

@@ -3,7 +3,14 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lots, stores, sales, healthForLot, inr } from "@/lib/mock-data";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
@@ -41,7 +48,12 @@ function ReportsPage() {
         title="Reports"
         subtitle="Daily summary, inventory health, supplier comparison, store performance"
         actions={
-          <Button variant="outline" onClick={() => toast.success("Export queued", { description: "CSV will download (demo)" })}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              toast.success("Export queued", { description: "CSV will download (demo)" })
+            }
+          >
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
         }
@@ -103,7 +115,9 @@ function ReportsPage() {
                       <TableCell>{stores.find((s) => s.id === l.storeId)?.code}</TableCell>
                       <TableCell>{l.remaining}</TableCell>
                       <TableCell>{inr(h.effCost)}</TableCell>
-                      <TableCell className={h.margin < 0 ? "text-destructive" : "text-success"}>{(h.margin * 100).toFixed(1)}%</TableCell>
+                      <TableCell className={h.margin < 0 ? "text-destructive" : "text-success"}>
+                        {(h.margin * 100).toFixed(1)}%
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -149,7 +163,9 @@ function ReportsPage() {
               <TableBody>
                 {storePerf.map((s) => (
                   <TableRow key={s.id}>
-                    <TableCell>{s.code} — {s.name}</TableCell>
+                    <TableCell>
+                      {s.code} — {s.name}
+                    </TableCell>
                     <TableCell>{s.lots}</TableCell>
                     <TableCell>{inr(s.capital)}</TableCell>
                     <TableCell className="text-right font-medium">{inr(s.revenue)}</TableCell>

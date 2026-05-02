@@ -1,0 +1,30 @@
+{
+  "generator-jhipster": {
+    "applicationType": "monolith",
+    "authenticationType": "jwt",
+    "baseName": "mercotraceRetailer",
+    "buildTool": "maven",
+    "cacheProvider": "caffeine",
+    "clientFramework": "no",
+    "databaseType": "sql",
+    "devDatabaseType": "postgresql",
+    "enableHibernateCache": true,
+    "enableSwaggerCodegen": false,
+    "enableTranslation": false,
+    "entities": ["Store", "Sku", "InventoryLot", "Sale", "SaleLine"],
+    "jhipsterVersion": "9.0.0",
+    "jwtSecretKey": "NjBiZDliODYwMTIwNTRlYzQxOThjNTNhNzM2YTAzMGIxNjdjNWIyYjhkMmMxNTNjYTYzMDM5MmY5ZjA0NDUwMTE5OTNkZWJmYWVjOTRmMjg3ZmY3MDYwMzg2ZmQyYWUxOTUzYjVjODc5ZjE1MWRiNzQ3NzE0NTM1ZGNjZDBmOTI=",
+    "lastLiquibaseTimestamp": 1777717845000,
+    "messageBroker": false,
+    "monorepository": true,
+    "packageName": "com.mercotrace.retailer",
+    "prodDatabaseType": "postgresql",
+    "reactive": false,
+    "searchEngine": "no",
+    "serverPort": "8080",
+    "serviceDiscoveryType": "no",
+    "skipClient": true,
+    "skipCommitHook": true,
+    "testFrameworks": []
+  }
+}

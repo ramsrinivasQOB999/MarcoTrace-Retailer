@@ -9,14 +9,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { stores } from "@/lib/mock-data";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Printer, Scale, ShieldCheck, Trash2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { permissionsFor } from "@/lib/permissions";
 import { ROLE_LABELS } from "@/lib/auth-store";
 import type { Role } from "@/lib/mock-data";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { withPerm } from "@/components/with-perm";
 
@@ -27,7 +40,10 @@ export const Route = createFileRoute("/app/store-admin")({
 
 const employeeSchema = z.object({
   name: z.string().trim().min(2, "Name min 2 chars").max(60),
-  phone: z.string().trim().regex(/^\+?\d{10,13}$/, "Invalid phone"),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\+?\d{10,13}$/, "Invalid phone"),
   role: z.enum(["store_admin", "employee"]),
 });
 
@@ -37,7 +53,11 @@ function StoreAdminPage() {
     { id: "e1", name: "Asha Menon", phone: "+91 98800 22221", role: "store_admin" as const },
     { id: "e2", name: "Vikram Rao", phone: "+91 98800 22222", role: "employee" as const },
   ]);
-  const [draft, setDraft] = useState({ name: "", phone: "", role: "employee" as "employee" | "store_admin" });
+  const [draft, setDraft] = useState({
+    name: "",
+    phone: "",
+    role: "employee" as "employee" | "store_admin",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const addEmployee = () => {
@@ -100,7 +120,10 @@ function StoreAdminPage() {
             </div>
             <div className="sm:col-span-2 flex justify-end gap-2">
               <Button variant="outline">Request approval</Button>
-              <Button className="bg-brand-gradient text-primary-foreground hover:opacity-95" onClick={() => toast.success("Identity saved")}>
+              <Button
+                className="bg-brand-gradient text-primary-foreground hover:opacity-95"
+                onClick={() => toast.success("Identity saved")}
+              >
                 Save
               </Button>
             </div>
@@ -113,7 +136,10 @@ function StoreAdminPage() {
               { icon: Scale, name: "Mercotrace Weighing Scale", id: "WS-001", on: true },
               { icon: Printer, name: "Thermal Printer", id: "TP-002", on: true },
             ].map((d) => (
-              <div key={d.id} className="flex items-center gap-3 rounded-lg border border-white/40 bg-white/40 p-3">
+              <div
+                key={d.id}
+                className="flex items-center gap-3 rounded-lg border border-white/40 bg-white/40 p-3"
+              >
                 <d.icon className="h-5 w-5 text-primary" />
                 <div className="min-w-0">
                   <div className="text-sm font-medium truncate">{d.name}</div>
@@ -122,7 +148,10 @@ function StoreAdminPage() {
                 <Switch defaultChecked={d.on} className="ml-auto" />
               </div>
             ))}
-            <Button variant="outline"><Plus className="h-4 w-4 mr-1" />Add device</Button>
+            <Button variant="outline">
+              <Plus className="h-4 w-4 mr-1" />
+              Add device
+            </Button>
           </Card>
         </TabsContent>
 
@@ -131,18 +160,32 @@ function StoreAdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
               <div className="space-y-1.5 sm:col-span-1">
                 <Label>Name</Label>
-                <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+                <Input
+                  value={draft.name}
+                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                />
                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Phone</Label>
-                <Input value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} placeholder="+91…" />
+                <Input
+                  value={draft.phone}
+                  onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
+                  placeholder="+91…"
+                />
                 {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Role</Label>
-                <Select value={draft.role} onValueChange={(v) => setDraft({ ...draft, role: v as "employee" | "store_admin" })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={draft.role}
+                  onValueChange={(v) =>
+                    setDraft({ ...draft, role: v as "employee" | "store_admin" })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="employee">Employee</SelectItem>
                     <SelectItem value="store_admin">Store Admin</SelectItem>
@@ -150,8 +193,12 @@ function StoreAdminPage() {
                 </Select>
               </div>
               <div className="flex items-end">
-                <Button onClick={addEmployee} className="w-full bg-brand-gradient text-primary-foreground hover:opacity-95">
-                  <Plus className="h-4 w-4 mr-1" />Add
+                <Button
+                  onClick={addEmployee}
+                  className="w-full bg-brand-gradient text-primary-foreground hover:opacity-95"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add
                 </Button>
               </div>
             </div>
@@ -164,7 +211,9 @@ function StoreAdminPage() {
                     <div className="text-sm font-medium truncate">{e.name}</div>
                     <div className="text-xs text-muted-foreground truncate">{e.phone}</div>
                   </div>
-                  <Badge variant="secondary" className="ml-auto">{e.role === "store_admin" ? "Store Admin" : "Employee"}</Badge>
+                  <Badge variant="secondary" className="ml-auto">
+                    {e.role === "store_admin" ? "Store Admin" : "Employee"}
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -182,20 +231,21 @@ function StoreAdminPage() {
         <TabsContent value="matrix">
           <Card className="glass-card p-5 sm:p-6 space-y-3 overflow-x-auto">
             <p className="text-sm text-muted-foreground">
-              Authoritative role × permission matrix. Anything not checked is hidden in the UI and rejected by route guards.
+              Authoritative role × permission matrix. Anything not checked is hidden in the UI and
+              rejected by route guards.
             </p>
             {(() => {
               const roles: Role[] = ["agglomerate_admin", "store_admin", "employee", "customer"];
-              const allPerms = Array.from(
-                new Set(roles.flatMap((r) => permissionsFor(r))),
-              ).sort();
+              const allPerms = Array.from(new Set(roles.flatMap((r) => permissionsFor(r)))).sort();
               return (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[220px]">Permission</TableHead>
                       {roles.map((r) => (
-                        <TableHead key={r} className="text-center">{ROLE_LABELS[r]}</TableHead>
+                        <TableHead key={r} className="text-center">
+                          {ROLE_LABELS[r]}
+                        </TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
@@ -237,11 +287,14 @@ function StoreAdminPage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Agglomerate-level RBAC supersedes store-level. Stock transfers within agglomeration require Agglomerate Admin.
+              Agglomerate-level RBAC supersedes store-level. Stock transfers within agglomeration
+              require Agglomerate Admin.
             </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline">Send OTP to owner</Button>
-              <Button className="bg-brand-gradient text-primary-foreground hover:opacity-95">Save</Button>
+              <Button className="bg-brand-gradient text-primary-foreground hover:opacity-95">
+                Save
+              </Button>
             </div>
           </Card>
         </TabsContent>
