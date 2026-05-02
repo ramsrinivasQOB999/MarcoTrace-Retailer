@@ -93,7 +93,7 @@ function LoginPage() {
         <div className="hidden lg:flex flex-col justify-between p-10 text-white">
           <div className="flex items-center">
             <img
-              src={logoLockup}
+              src={logoLight}
               alt="Mercotrace — Smart Mandi Platform"
               className="h-11 w-auto object-contain drop-shadow"
             />
@@ -117,7 +117,7 @@ function LoginPage() {
           <Card className="glass-card w-full max-w-md p-6 sm:p-8 border-white/60">
             <div className="flex items-center gap-3 mb-6">
               <img
-                src={logoLockup}
+                src={logoDark}
                 alt="Mercotrace"
                 className="h-9 w-auto object-contain lg:hidden"
               />
