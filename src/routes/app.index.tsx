@@ -16,6 +16,9 @@ import {
 } from "recharts";
 import { ArrowUpRight, IndianRupee, Boxes, AlertTriangle, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Navigate } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth-store";
+import { Can } from "@/components/can";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Dashboard — Mercotrace" }] }),
