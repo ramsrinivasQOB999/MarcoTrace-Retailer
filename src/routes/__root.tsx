@@ -29,10 +29,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mercotrace Retail Trade" },
-      { name: "description", content: "Multi-store retail inventory & POS — lot tracking, GST billing, expiry & margin alerts." },
+      { title: "Mercotrace – Retail Platform" },
+      { name: "description", content: "Mercotrace – Retail Platform: multi-store inventory & POS, lot tracking, GST billing, expiry & margin alerts." },
       { name: "author", content: "Mercotrace" },
-      { property: "og:title", content: "Mercotrace Retail Trade" },
+      { property: "og:title", content: "Mercotrace – Retail Platform" },
       { property: "og:description", content: "Multi-store retail inventory & POS." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
