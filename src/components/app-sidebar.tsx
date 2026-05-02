@@ -33,7 +33,8 @@ import { setAuth, useAuth, ROLE_LABELS } from "@/lib/auth-store";
 import type { Role } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { roleHasAny, type Permission } from "@/lib/permissions";
-import logoLockup from "@/assets/mercotrace-logo.png";
+import logoLockup from "@/assets/mercotrace-logo-light.png";
+import logoIcon from "@/assets/mercotrace-logo-dark.png";
 
 type NavItem = {
   title: string;
