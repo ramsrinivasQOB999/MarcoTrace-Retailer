@@ -179,9 +179,24 @@ export function AppSidebar() {
             variant="ghost"
             size="sm"
             className="w-full justify-start text-white hover:bg-white/15 hover:text-white"
-            onClick={() => {
-              setAuth(null);
-              navigate({ to: "/login" });
+            onClick={async () => {
+              try {
+                // Clear all client-side auth artifacts
+                setAuth(null);
+                if (typeof window !== "undefined") {
+                  try { sessionStorage.clear(); } catch { /* ignore */ }
+                  // Best-effort cookie clear (non-HttpOnly)
+                  document.cookie
+                    .split(";")
+                    .forEach((c) => {
+                      const name = c.split("=")[0]?.trim();
+                      if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
+                    });
+                }
+                toast.success("Signed out");
+              } finally {
+                await navigate({ to: "/login", replace: true });
+              }
             }}
           >
             <LogOut className="h-4 w-4" />
