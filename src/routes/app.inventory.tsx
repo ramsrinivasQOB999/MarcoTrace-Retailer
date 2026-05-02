@@ -41,21 +41,21 @@ function InventoryPage() {
       />
 
       <div className="grid grid-cols-3 gap-4">
-        <Card className="p-4">
+        <Card className="glass-card p-4">
           <div className="text-xs text-muted-foreground uppercase font-medium">Healthy</div>
           <div className="text-2xl font-semibold mt-1 text-success">{greens}</div>
         </Card>
-        <Card className="p-4">
+        <Card className="glass-card p-4">
           <div className="text-xs text-muted-foreground uppercase font-medium">At risk</div>
           <div className="text-2xl font-semibold mt-1 text-warning-foreground">{yellows}</div>
         </Card>
-        <Card className="p-4">
+        <Card className="glass-card p-4">
           <div className="text-xs text-muted-foreground uppercase font-medium">Loss / expiring</div>
           <div className="text-2xl font-semibold mt-1 text-destructive">{reds}</div>
         </Card>
       </div>
 
-      <Card className="p-4 space-y-4">
+      <Card className="glass-card p-4 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
           <div className="relative max-w-sm flex-1">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

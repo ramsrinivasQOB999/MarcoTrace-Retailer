@@ -137,7 +137,7 @@ function SKUsPage() {
         }
       />
 
-      <Card className="p-4">
+      <Card className="glass-card p-4">
         <div className="relative max-w-sm mb-3">
           <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search SKUs..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />

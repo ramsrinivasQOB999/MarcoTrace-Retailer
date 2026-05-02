@@ -42,7 +42,7 @@ function InsightsPage() {
       <PageHeader title="Inventory Insights" subtitle="Aging, capital lock, profitability & risk" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="p-5 lg:col-span-2">
+        <Card className="glass-card p-5 lg:col-span-2">
           <h3 className="font-semibold mb-4">Capital locked by age</h3>
           <div className="h-64">
             <ResponsiveContainer>
@@ -56,7 +56,7 @@ function InsightsPage() {
             </ResponsiveContainer>
           </div>
         </Card>
-        <Card className="p-5">
+        <Card className="glass-card p-5">
           <h3 className="font-semibold mb-4">Lot health distribution</h3>
           <div className="h-64">
             <ResponsiveContainer>
@@ -72,7 +72,7 @@ function InsightsPage() {
         </Card>
       </div>
 
-      <Card className="p-5">
+      <Card className="glass-card p-5">
         <h3 className="font-semibold mb-4">Flagged lots — review action</h3>
         <div className="space-y-2">
           {flagged.length === 0 && <div className="text-sm text-muted-foreground">All lots healthy 🎉</div>}

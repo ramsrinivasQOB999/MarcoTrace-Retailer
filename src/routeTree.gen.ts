@@ -14,9 +14,11 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppStoresRouteImport } from './routes/app.stores'
+import { Route as AppStoreAdminRouteImport } from './routes/app.store-admin'
 import { Route as AppSkusRouteImport } from './routes/app.skus'
 import { Route as AppReportsRouteImport } from './routes/app.reports'
 import { Route as AppPurchasesRouteImport } from './routes/app.purchases'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPosRouteImport } from './routes/app.pos'
 import { Route as AppInventoryRouteImport } from './routes/app.inventory'
 import { Route as AppInsightsRouteImport } from './routes/app.insights'
@@ -47,6 +49,11 @@ const AppStoresRoute = AppStoresRouteImport.update({
   path: '/stores',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStoreAdminRoute = AppStoreAdminRouteImport.update({
+  id: '/store-admin',
+  path: '/store-admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSkusRoute = AppSkusRouteImport.update({
   id: '/skus',
   path: '/skus',
@@ -60,6 +67,11 @@ const AppReportsRoute = AppReportsRouteImport.update({
 const AppPurchasesRoute = AppPurchasesRouteImport.update({
   id: '/purchases',
   path: '/purchases',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPosRoute = AppPosRouteImport.update({
@@ -91,9 +103,11 @@ export interface FileRoutesByFullPath {
   '/app/insights': typeof AppInsightsRoute
   '/app/inventory': typeof AppInventoryRoute
   '/app/pos': typeof AppPosRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/purchases': typeof AppPurchasesRoute
   '/app/reports': typeof AppReportsRoute
   '/app/skus': typeof AppSkusRoute
+  '/app/store-admin': typeof AppStoreAdminRoute
   '/app/stores': typeof AppStoresRoute
   '/app/': typeof AppIndexRoute
 }
@@ -104,9 +118,11 @@ export interface FileRoutesByTo {
   '/app/insights': typeof AppInsightsRoute
   '/app/inventory': typeof AppInventoryRoute
   '/app/pos': typeof AppPosRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/purchases': typeof AppPurchasesRoute
   '/app/reports': typeof AppReportsRoute
   '/app/skus': typeof AppSkusRoute
+  '/app/store-admin': typeof AppStoreAdminRoute
   '/app/stores': typeof AppStoresRoute
   '/app': typeof AppIndexRoute
 }
@@ -119,9 +135,11 @@ export interface FileRoutesById {
   '/app/insights': typeof AppInsightsRoute
   '/app/inventory': typeof AppInventoryRoute
   '/app/pos': typeof AppPosRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/purchases': typeof AppPurchasesRoute
   '/app/reports': typeof AppReportsRoute
   '/app/skus': typeof AppSkusRoute
+  '/app/store-admin': typeof AppStoreAdminRoute
   '/app/stores': typeof AppStoresRoute
   '/app/': typeof AppIndexRoute
 }
@@ -135,9 +153,11 @@ export interface FileRouteTypes {
     | '/app/insights'
     | '/app/inventory'
     | '/app/pos'
+    | '/app/profile'
     | '/app/purchases'
     | '/app/reports'
     | '/app/skus'
+    | '/app/store-admin'
     | '/app/stores'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -148,9 +168,11 @@ export interface FileRouteTypes {
     | '/app/insights'
     | '/app/inventory'
     | '/app/pos'
+    | '/app/profile'
     | '/app/purchases'
     | '/app/reports'
     | '/app/skus'
+    | '/app/store-admin'
     | '/app/stores'
     | '/app'
   id:
@@ -162,9 +184,11 @@ export interface FileRouteTypes {
     | '/app/insights'
     | '/app/inventory'
     | '/app/pos'
+    | '/app/profile'
     | '/app/purchases'
     | '/app/reports'
     | '/app/skus'
+    | '/app/store-admin'
     | '/app/stores'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -212,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStoresRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/store-admin': {
+      id: '/app/store-admin'
+      path: '/store-admin'
+      fullPath: '/app/store-admin'
+      preLoaderRoute: typeof AppStoreAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/skus': {
       id: '/app/skus'
       path: '/skus'
@@ -231,6 +262,13 @@ declare module '@tanstack/react-router' {
       path: '/purchases'
       fullPath: '/app/purchases'
       preLoaderRoute: typeof AppPurchasesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/pos': {
@@ -269,9 +307,11 @@ interface AppRouteChildren {
   AppInsightsRoute: typeof AppInsightsRoute
   AppInventoryRoute: typeof AppInventoryRoute
   AppPosRoute: typeof AppPosRoute
+  AppProfileRoute: typeof AppProfileRoute
   AppPurchasesRoute: typeof AppPurchasesRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSkusRoute: typeof AppSkusRoute
+  AppStoreAdminRoute: typeof AppStoreAdminRoute
   AppStoresRoute: typeof AppStoresRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -281,9 +321,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppInsightsRoute: AppInsightsRoute,
   AppInventoryRoute: AppInventoryRoute,
   AppPosRoute: AppPosRoute,
+  AppProfileRoute: AppProfileRoute,
   AppPurchasesRoute: AppPurchasesRoute,
   AppReportsRoute: AppReportsRoute,
   AppSkusRoute: AppSkusRoute,
+  AppStoreAdminRoute: AppStoreAdminRoute,
   AppStoresRoute: AppStoresRoute,
   AppIndexRoute: AppIndexRoute,
 }

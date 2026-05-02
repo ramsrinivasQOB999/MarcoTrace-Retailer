@@ -193,7 +193,7 @@ function PurchasesPage() {
         }
       />
 
-      <Card className="p-4">
+      <Card className="glass-card p-4">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
