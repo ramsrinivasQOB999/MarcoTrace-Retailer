@@ -145,10 +145,7 @@ function LoginPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Sign in as</Label>
-                  <Select
-                    value={form.watch("role")}
-                    onValueChange={(v) => form.setValue("role", v as Role, { shouldValidate: true })}
-                  >
+                  <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
