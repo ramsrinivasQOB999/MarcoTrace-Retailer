@@ -27,16 +27,16 @@ function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-aero-app">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 sticky top-0 z-20 bg-card/80 backdrop-blur border-b flex items-center px-3 gap-2">
+          <header className="h-14 sticky top-0 z-20 glass-panel border-b flex items-center px-3 gap-2">
             <SidebarTrigger />
             <div className="ml-auto flex items-center gap-2">
               <Button variant="ghost" size="icon" aria-label="Notifications">
                 <Bell className="h-4 w-4" />
               </Button>
-              <Link to="/app" className="flex items-center gap-2 rounded-full pl-2 pr-1 py-1 hover:bg-muted">
+              <Link to="/app/profile" className="flex items-center gap-2 rounded-full pl-2 pr-1 py-1 hover:bg-white/40">
                 <div className="hidden sm:block text-right leading-tight">
                   <div className="text-xs font-medium">{user?.name}</div>
                   <div className="text-[10px] text-muted-foreground">
@@ -44,7 +44,10 @@ function AppLayout() {
                   </div>
                 </div>
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-brand-gradient text-primary-foreground text-xs">
+                  <AvatarFallback
+                    className="text-primary-foreground text-xs"
+                    style={{ backgroundImage: "linear-gradient(135deg, #5B8DEF 0%, #6C63FF 100%)" }}
+                  >
                     {initials}
                   </AvatarFallback>
                 </Avatar>
