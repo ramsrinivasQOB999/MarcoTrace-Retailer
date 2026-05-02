@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -95,11 +96,17 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const role: Role | undefined = user?.role;
 
+  // Defer active-state until after hydration to avoid SSR/client mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const isVisible = (item: NavItem) =>
     item.perms.length === 0 ? true : roleHasAny(role, item.perms);
 
-  const isActive = (url: string, exact?: boolean) =>
-    exact ? path === url : path === url || path.startsWith(url + "/");
+  const isActive = (url: string, exact?: boolean) => {
+    if (!mounted) return false;
+    return exact ? path === url : path === url || path.startsWith(url + "/");
+  };
 
   return (
     <Sidebar
@@ -110,11 +117,11 @@ export function AppSidebar() {
         <Link
           to="/app"
           className="flex items-center px-2 py-3 overflow-hidden"
-          aria-label="Mercotrace — Smart Mandi Platform"
+          aria-label="Mercotrace – Retail Platform"
         >
           <img
             src={logoLockup}
-            alt="Mercotrace — Smart Mandi Platform"
+            alt="Mercotrace – Retail Platform"
             className={collapsed ? "h-8 w-auto object-contain object-left" : "h-9 w-auto object-contain"}
             style={collapsed ? { width: "32px" } : undefined}
           />
