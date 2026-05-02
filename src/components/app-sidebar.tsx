@@ -106,17 +106,17 @@ export function AppSidebar() {
       className="[&>div[data-sidebar=sidebar]]:bg-aero-sidebar [&>div[data-sidebar=sidebar]]:text-white [&>div[data-sidebar=sidebar]]:border-r-0"
     >
       <SidebarHeader className="border-b border-white/15">
-        <Link to="/app" className="flex items-center gap-2 px-2 py-2">
-          <div
-            className="h-9 w-9 rounded-xl grid place-items-center shadow-elev bg-white/15 backdrop-blur-md border border-white/25"
-          >
-            <span className="text-white font-bold">M</span>
-          </div>
-          {!collapsed && (
-            <div className="leading-tight">
-              <div className="font-semibold text-sm text-white">Mercotrace</div>
-              <div className="text-[11px] text-white/70">Retail Trade</div>
+        <Link to="/app" className="flex items-center px-2 py-2" aria-label="Mercotrace home">
+          {collapsed ? (
+            <div className="h-9 w-9 rounded-xl grid place-items-center shadow-elev bg-white/15 backdrop-blur-md border border-white/25">
+              <img src={logoLockup} alt="" className="h-6 w-6 object-contain" />
             </div>
+          ) : (
+            <img
+              src={logoLockup}
+              alt="Mercotrace — Smart Mandi Platform"
+              className="h-9 w-auto object-contain"
+            />
           )}
         </Link>
       </SidebarHeader>
