@@ -15,6 +15,7 @@ import { DEFAULT_ROUTE } from "@/lib/permissions";
 import { toast } from "sonner";
 import { ShieldCheck, Smartphone } from "lucide-react";
 import bgVeggies from "@/assets/login-veggies.jpg";
+import logoLockup from "@/assets/mercotrace-logo.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -89,12 +90,12 @@ function LoginPage() {
       <div className="relative z-10 min-h-screen grid lg:grid-cols-2">
         {/* Left brand panel */}
         <div className="hidden lg:flex flex-col justify-between p-10 text-white">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur grid place-items-center font-bold border border-white/25">M</div>
-            <div>
-              <div className="font-semibold">Mercotrace</div>
-              <div className="text-xs text-white/80">Retail Trade · v0.1</div>
-            </div>
+          <div className="flex items-center">
+            <img
+              src={logoLockup}
+              alt="Mercotrace — Smart Mandi Platform"
+              className="h-11 w-auto object-contain drop-shadow"
+            />
           </div>
           <div className="space-y-4 max-w-md">
             <h1 className="text-4xl font-semibold leading-tight">Run every store with one nervous system.</h1>
@@ -113,11 +114,12 @@ function LoginPage() {
         {/* Right glass card */}
         <div className="flex items-center justify-center p-4 sm:p-6">
           <Card className="glass-card w-full max-w-md p-6 sm:p-8 border-white/60">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="h-10 w-10 rounded-xl grid place-items-center text-white font-bold lg:hidden"
-                style={{ backgroundImage: "linear-gradient(135deg, #5B8DEF 0%, #6C63FF 100%)" }}>
-                M
-              </div>
+            <div className="flex items-center gap-3 mb-6">
+              <img
+                src={logoLockup}
+                alt="Mercotrace"
+                className="h-9 w-auto object-contain lg:hidden"
+              />
               <div>
                 <h2 className="text-xl font-semibold">Sign in</h2>
                 <p className="text-sm text-muted-foreground">Phone OTP authentication</p>
