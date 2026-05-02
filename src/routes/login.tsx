@@ -42,16 +42,18 @@ function LoginPage() {
   const [stage, setStage] = useState<"phone" | "otp">("phone");
   const [otp, setOtp] = useState("");
   const [pending, setPending] = useState<PhoneForm | null>(null);
+  const [role, setRole] = useState<Role>("store_admin");
 
   const form = useForm<PhoneForm>({
     resolver: zodResolver(phoneSchema),
     defaultValues: { phone: "", role: "store_admin", name: "" },
   });
 
-  const onSubmit = (data: PhoneForm) => {
-    setPending(data);
+  const onSubmit = (data: Omit<PhoneForm, "role">) => {
+    const merged: PhoneForm = { ...data, role };
+    setPending(merged);
     setStage("otp");
-    toast.success("OTP sent", { description: `Use code 123456 (demo) for ${data.phone}` });
+    toast.success("OTP sent", { description: `Use code 123456 (demo) for ${merged.phone}` });
   };
 
   const verify = () => {
