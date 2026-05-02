@@ -15,7 +15,8 @@ import { DEFAULT_ROUTE } from "@/lib/permissions";
 import { toast } from "sonner";
 import { ShieldCheck, Smartphone } from "lucide-react";
 import bgVeggies from "@/assets/login-veggies.jpg";
-import logoLockup from "@/assets/mercotrace-logo.png";
+import logoLight from "@/assets/mercotrace-logo-light.png";
+import logoDark from "@/assets/mercotrace-logo-dark.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
