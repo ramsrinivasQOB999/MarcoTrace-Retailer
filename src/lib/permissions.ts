@@ -1,4 +1,4 @@
-// Centralized RBAC matrix for Mercotrace Retail Trade
+// Centralized RBAC matrix for Mercotrace – Retail Platform
 import type { Role } from "./mock-data";
 import { getAuth } from "./auth-store";
 

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -34,7 +35,7 @@ import type { Role } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { roleHasAny, type Permission } from "@/lib/permissions";
 import logoLockup from "@/assets/mercotrace-logo-light.png";
-import logoIcon from "@/assets/mercotrace-logo-dark.png";
+import { toast } from "sonner";
 
 type NavItem = {
   title: string;
@@ -95,11 +96,17 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const role: Role | undefined = user?.role;
 
+  // Defer active-state until after hydration to avoid SSR/client mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const isVisible = (item: NavItem) =>
     item.perms.length === 0 ? true : roleHasAny(role, item.perms);
 
-  const isActive = (url: string, exact?: boolean) =>
-    exact ? path === url : path === url || path.startsWith(url + "/");
+  const isActive = (url: string, exact?: boolean) => {
+    if (!mounted) return false;
+    return exact ? path === url : path === url || path.startsWith(url + "/");
+  };
 
   return (
     <Sidebar
@@ -110,11 +117,11 @@ export function AppSidebar() {
         <Link
           to="/app"
           className="flex items-center px-2 py-3 overflow-hidden"
-          aria-label="Mercotrace — Smart Mandi Platform"
+          aria-label="Mercotrace – Retail Platform"
         >
           <img
             src={logoLockup}
-            alt="Mercotrace — Smart Mandi Platform"
+            alt="Mercotrace – Retail Platform"
             className={collapsed ? "h-8 w-auto object-contain object-left" : "h-9 w-auto object-contain"}
             style={collapsed ? { width: "32px" } : undefined}
           />
@@ -172,9 +179,24 @@ export function AppSidebar() {
             variant="ghost"
             size="sm"
             className="w-full justify-start text-white hover:bg-white/15 hover:text-white"
-            onClick={() => {
-              setAuth(null);
-              navigate({ to: "/login" });
+            onClick={async () => {
+              try {
+                // Clear all client-side auth artifacts
+                setAuth(null);
+                if (typeof window !== "undefined") {
+                  try { sessionStorage.clear(); } catch { /* ignore */ }
+                  // Best-effort cookie clear (non-HttpOnly)
+                  document.cookie
+                    .split(";")
+                    .forEach((c) => {
+                      const name = c.split("=")[0]?.trim();
+                      if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
+                    });
+                }
+                toast.success("Signed out");
+              } finally {
+                await navigate({ to: "/login", replace: true });
+              }
             }}
           >
             <LogOut className="h-4 w-4" />

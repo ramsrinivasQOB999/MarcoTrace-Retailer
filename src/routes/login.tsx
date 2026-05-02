@@ -21,8 +21,8 @@ import logoDark from "@/assets/mercotrace-logo-dark.png";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Mercotrace Retail Trade" },
-      { name: "description", content: "Phone OTP sign-in for Mercotrace Retail Trade — multi-role retail inventory & POS." },
+      { title: "Sign in — Mercotrace – Retail Platform" },
+      { name: "description", content: "Phone OTP sign-in for Mercotrace – Retail Platform — multi-role retail inventory & POS." },
     ],
   }),
   component: LoginPage,
@@ -94,7 +94,7 @@ function LoginPage() {
           <div className="flex items-center">
             <img
               src={logoLight}
-              alt="Mercotrace — Smart Mandi Platform"
+              alt="Mercotrace – Retail Platform"
               className="h-11 w-auto object-contain drop-shadow"
             />
           </div>
