@@ -147,7 +147,7 @@ function LoginPage() {
                     onValueChange={(v) => form.setValue("role", v as Role, { shouldValidate: true })}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
                       {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
