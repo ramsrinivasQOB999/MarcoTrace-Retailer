@@ -179,6 +179,51 @@ function StoreAdminPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="matrix">
+          <Card className="glass-card p-5 sm:p-6 space-y-3 overflow-x-auto">
+            <p className="text-sm text-muted-foreground">
+              Authoritative role × permission matrix. Anything not checked is hidden in the UI and rejected by route guards.
+            </p>
+            {(() => {
+              const roles: Role[] = ["agglomerate_admin", "store_admin", "employee", "customer"];
+              const allPerms = Array.from(
+                new Set(roles.flatMap((r) => permissionsFor(r))),
+              ).sort();
+              return (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[220px]">Permission</TableHead>
+                      {roles.map((r) => (
+                        <TableHead key={r} className="text-center">{ROLE_LABELS[r]}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allPerms.map((p) => (
+                      <TableRow key={p}>
+                        <TableCell className="font-mono text-xs">{p}</TableCell>
+                        {roles.map((r) => {
+                          const has = permissionsFor(r).includes(p);
+                          return (
+                            <TableCell key={r} className="text-center">
+                              {has ? (
+                                <Check className="h-4 w-4 text-success inline-block" />
+                              ) : (
+                                <X className="h-4 w-4 text-muted-foreground/40 inline-block" />
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              );
+            })()}
+          </Card>
+        </TabsContent>
+
         <TabsContent value="agglomeration">
           <Card className="glass-card p-5 sm:p-6 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
