@@ -174,3 +174,94 @@ export async function createStoreApi(
   const dto = (await res.json()) as ApiStoreDTO;
   return mapApiStoreToStore(dto);
 }
+
+export type ApiAdminUserDTO = {
+  id: number;
+  login: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  authorities: string[];
+};
+
+export type UiEmployee = {
+  id: string;
+  name: string;
+  phone: string;
+  role: "store_admin" | "employee";
+  login: string;
+};
+
+function mapAdminUserToEmployee(dto: ApiAdminUserDTO): UiEmployee {
+  const name = [dto.firstName ?? "", dto.lastName ?? ""].join(" ").trim() || dto.login;
+  return {
+    id: String(dto.id),
+    name,
+    phone: dto.login,
+    role: dto.authorities.includes("ROLE_ADMIN") ? "store_admin" : "employee",
+    login: dto.login,
+  };
+}
+
+export async function fetchAdminUsers(token: string): Promise<UiEmployee[]> {
+  const res = await fetch(
+    requestUrl("/api/admin/users?page=0&size=200&sort=id,asc"),
+    apiFetchInit({
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  if (!res.ok) {
+    throw new Error(`Admin users request failed (${res.status})`);
+  }
+  const list = (await res.json()) as ApiAdminUserDTO[];
+  return list.map(mapAdminUserToEmployee);
+}
+
+export async function createAdminUserApi(
+  token: string,
+  payload: { name: string; phone: string; role: "store_admin" | "employee" },
+): Promise<UiEmployee> {
+  const cleanPhone = payload.phone.replace(/\s+/g, "");
+  const cleanDigits = cleanPhone.replace(/^\+/, "");
+  const first = payload.name.trim().split(/\s+/)[0] ?? "User";
+  const last = payload.name.trim().split(/\s+/).slice(1).join(" ") || "Retail";
+  const login = cleanDigits.slice(0, 50).toLowerCase();
+  const email = `${login}@mercotrace.local`;
+  const res = await fetch(
+    requestUrl("/api/admin/users"),
+    apiFetchInit({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        login,
+        firstName: first,
+        lastName: last,
+        email,
+        langKey: "en",
+        activated: true,
+        authorities: payload.role === "store_admin" ? ["ROLE_ADMIN"] : ["ROLE_USER"],
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Create employee failed (${res.status})`);
+  }
+  const dto = (await res.json()) as ApiAdminUserDTO;
+  return mapAdminUserToEmployee(dto);
+}
+
+export async function deleteAdminUserApi(token: string, login: string): Promise<void> {
+  const res = await fetch(
+    requestUrl(`/api/admin/users/${encodeURIComponent(login)}`),
+    apiFetchInit({
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Delete employee failed (${res.status})`);
+  }
+}
