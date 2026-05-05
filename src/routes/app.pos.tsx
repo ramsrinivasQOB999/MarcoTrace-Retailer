@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { skus, lots, stores, inr, healthForLot } from "@/lib/mock-data";
+import { skus, lots, stores, inr } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-store";
+import {
+  createSaleApi,
+  createSaleLineApi,
+  fetchInventoryLots,
+  fetchSkus,
+  fetchStores,
+  getApiBaseUrl,
+  updateInventoryLotApi,
+} from "@/lib/api";
 import { Plus, Minus, Search, Trash2, ShieldAlert, QrCode } from "lucide-react";
 import {
   Select,
@@ -39,24 +50,54 @@ interface CartItem {
 }
 
 function PosPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
+  const queryClient = useQueryClient();
   const [storeId, setStoreId] = useState(stores[0].id);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [q, setQ] = useState("");
   const [paid, setPaid] = useState<{ bill: string; total: number; gst: number } | null>(null);
 
+  const storesQuery = useQuery({
+    queryKey: ["stores", token],
+    queryFn: () => fetchStores(token!),
+    enabled: Boolean(token),
+  });
+  const skusQuery = useQuery({
+    queryKey: ["skus", token],
+    queryFn: () => fetchSkus(token!),
+    enabled: Boolean(token),
+  });
+  const lotsQuery = useQuery({
+    queryKey: ["inventory-lots", token],
+    queryFn: () => fetchInventoryLots(token!),
+    enabled: Boolean(token),
+  });
+
+  const storesData = token ? (storesQuery.data ?? []) : stores;
+  const skusData = token ? (skusQuery.data ?? []) : skus;
+  const lotsData = token ? (lotsQuery.data ?? []) : lots;
+
+  useEffect(() => {
+    if (!storesData.length) return;
+    if (!storesData.some((s) => s.id === storeId)) {
+      setStoreId(storesData[0].id);
+    }
+  }, [storesData, storeId]);
+
   const filtered = useMemo(
     () =>
-      skus.filter(
+      skusData.filter(
         (s) =>
           s.active &&
           [s.code, s.name, s.category].join(" ").toLowerCase().includes(q.toLowerCase()),
       ),
-    [q],
+    [q, skusData],
   );
 
   const add = (skuId: string) => {
     // expiry guard: if every available lot for this SKU at this store is expired, block
-    const storeLots = lots.filter(
+    const storeLots = lotsData.filter(
       (l) => l.skuId === skuId && l.storeId === storeId && l.remaining > 0,
     );
     const sellable = storeLots.filter((l) => new Date(l.expiryDate) > new Date());
@@ -88,20 +129,101 @@ function PosPage() {
     let subtotal = 0;
     let gst = 0;
     cart.forEach((c) => {
-      const sku = skus.find((s) => s.id === c.skuId)!;
+      const sku = skusData.find((s) => s.id === c.skuId);
+      if (!sku) return;
       const line = sku.basePrice * c.qty;
       subtotal += line;
       gst += (line * sku.gst) / (100 + sku.gst);
     });
     return { subtotal, gst, total: subtotal };
-  }, [cart]);
+  }, [cart, skusData]);
 
-  const checkout = () => {
+  const checkout = async () => {
     if (cart.length === 0) return;
-    const billNo = `BILL-${Math.floor(Math.random() * 9000 + 1000)}`;
-    setPaid({ bill: billNo, total: totals.total, gst: totals.gst });
-    setCart([]);
-    toast.success("Sale completed", { description: billNo });
+    const billNo = `BILL-${Date.now()}`;
+    try {
+      for (const item of cart) {
+        const stock = lotsData
+          .filter(
+            (l) =>
+              l.skuId === item.skuId &&
+              l.storeId === storeId &&
+              l.remaining > 0 &&
+              new Date(l.expiryDate) > new Date(),
+          )
+          .reduce((sum, l) => sum + l.remaining, 0);
+        if (stock < item.qty) {
+          const skuName = skusData.find((s) => s.id === item.skuId)?.name ?? "SKU";
+          toast.error("Insufficient stock", { description: `${skuName} has only ${stock} sellable units` });
+          return;
+        }
+      }
+
+      if (token) {
+        const sale = await createSaleApi(token, {
+          billNo,
+          date: new Date().toISOString(),
+          total: totals.total,
+          gst: totals.gst,
+          payment: "CASH",
+          storeId: Number(storeId),
+        });
+
+        await Promise.all(
+          cart.map(async (item) => {
+            const sku = skusData.find((s) => s.id === item.skuId);
+            if (!sku) return;
+            await createSaleLineApi(token, {
+              qty: item.qty,
+              price: sku.basePrice,
+              saleId: Number(sale.id),
+              skuId: Number(sku.id),
+            });
+          }),
+        );
+
+        const updates = new Map<string, number>();
+        for (const item of cart) {
+          let toDeduct = item.qty;
+          const fifoLots = [...lotsData]
+            .filter(
+              (l) =>
+                l.skuId === item.skuId &&
+                l.storeId === storeId &&
+                l.remaining > 0 &&
+                new Date(l.expiryDate) > new Date(),
+            )
+            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+          for (const lot of fifoLots) {
+            if (toDeduct <= 0) break;
+            const take = Math.min(lot.remaining, toDeduct);
+            const newRemaining = (updates.has(lot.id) ? updates.get(lot.id)! : lot.remaining) - take;
+            updates.set(lot.id, newRemaining);
+            toDeduct -= take;
+          }
+        }
+
+        await Promise.all(
+          Array.from(updates.entries()).map(async ([lotId, remaining]) => {
+            const lot = lotsData.find((l) => l.id === lotId);
+            if (!lot) return;
+            await updateInventoryLotApi(token, { ...lot, remaining });
+          }),
+        );
+
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["sales", token] }),
+          queryClient.invalidateQueries({ queryKey: ["sale-lines", token] }),
+          queryClient.invalidateQueries({ queryKey: ["inventory-lots", token] }),
+        ]);
+      }
+
+      setPaid({ bill: billNo, total: totals.total, gst: totals.gst });
+      setCart([]);
+      toast.success("Sale completed", { description: billNo });
+    } catch (e) {
+      toast.error("Checkout failed", { description: e instanceof Error ? e.message : String(e) });
+    }
   };
 
   return (
@@ -116,7 +238,7 @@ function PosPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {stores.map((s) => (
+                {storesData.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.code} — {s.name}
                   </SelectItem>
@@ -126,6 +248,12 @@ function PosPage() {
           </div>
         }
       />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {storesQuery.isFetching || skusQuery.isFetching || lotsQuery.isFetching ? " · Loading…" : ""}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <Card className="glass-card p-4 lg:col-span-3">
@@ -140,11 +268,11 @@ function PosPage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {filtered.map((s) => {
-              const stock = lots
+              const stock = lotsData
                 .filter((l) => l.skuId === s.id && l.storeId === storeId)
                 .reduce((a, l) => a + l.remaining, 0);
               const expired =
-                lots
+                lotsData
                   .filter((l) => l.skuId === s.id && l.storeId === storeId)
                   .every((l) => new Date(l.expiryDate) <= new Date()) && stock > 0;
               return (
@@ -198,7 +326,8 @@ function PosPage() {
                 </TableHeader>
                 <TableBody>
                   {cart.map((c) => {
-                    const sku = skus.find((s) => s.id === c.skuId)!;
+                    const sku = skusData.find((s) => s.id === c.skuId);
+                    if (!sku) return null;
                     return (
                       <TableRow key={c.skuId}>
                         <TableCell>

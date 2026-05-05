@@ -27,13 +27,14 @@ export const Route = createFileRoute("/app/")({
 
 const trend = Array.from({ length: 14 }).map((_, i) => ({
   day: `D${i + 1}`,
-  revenue: 12000 + Math.round(Math.sin(i / 2) * 4000 + i * 600 + Math.random() * 1500),
-  orders: 30 + Math.round(Math.cos(i / 2) * 8 + i * 1.2 + Math.random() * 5),
+  // Keep chart data deterministic to avoid SSR hydration mismatches.
+  revenue: 12000 + Math.round(Math.sin(i / 2) * 4000 + i * 600 + ((i * 137) % 1500)),
+  orders: 30 + Math.round(Math.cos(i / 2) * 8 + i * 1.2 + ((i * 41) % 5)),
 }));
 
-const byStore = stores.map((s) => ({
+const byStore = stores.map((s, idx) => ({
   name: s.code,
-  revenue: 50000 + Math.round(Math.random() * 90000),
+  revenue: 50000 + ((idx * 23711 + 127) % 90000),
 }));
 
 function Stat({

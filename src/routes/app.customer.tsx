@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { sales, inr } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-store";
+import { fetchSales, getApiBaseUrl } from "@/lib/api";
 import { Smartphone, Gift, Wallet, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/app/customer")({
@@ -11,9 +14,24 @@ export const Route = createFileRoute("/app/customer")({
 });
 
 function CustomerPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
+  const salesQuery = useQuery({
+    queryKey: ["sales", token],
+    queryFn: () => fetchSales(token!),
+    enabled: Boolean(token),
+  });
+  const salesData = token ? (salesQuery.data ?? []) : sales;
+
   return (
     <>
       <PageHeader title="Customer mobile app" subtitle="Bills, payments, rewards & offers" />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {salesQuery.isFetching ? " · Loading…" : ""}
+        </p>
+      )}
 
       <Card className="glass-card p-5 border-warning/30 bg-warning/5">
         <div className="flex gap-3">
@@ -57,7 +75,7 @@ function CustomerPage() {
               <div className="text-xs font-medium text-muted-foreground uppercase">
                 Recent bills
               </div>
-              {sales.slice(0, 3).map((s) => (
+              {salesData.slice(0, 3).map((s) => (
                 <div key={s.id} className="rounded-lg border p-3 flex justify-between items-center">
                   <div>
                     <div className="font-mono text-xs">{s.billNo}</div>

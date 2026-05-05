@@ -5,9 +5,12 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { nitro } from "nitro/vite";
 
 export default defineConfig({
   vite: {
+    // Nitro generates Vercel-compatible server output for TanStack Start.
+    plugins: [nitro()],
     server: {
       port: 5173,
       // Browser calls /api on the dev server; forward to Spring Boot (port must match application-dev.yml).

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,8 +20,14 @@ import { Plus, Printer, Scale, ShieldCheck, Trash2, Check, X } from "lucide-reac
 import { toast } from "sonner";
 import { z } from "zod";
 import { permissionsFor } from "@/lib/permissions";
-import { ROLE_LABELS } from "@/lib/auth-store";
+import { ROLE_LABELS, useAuth } from "@/lib/auth-store";
 import type { Role } from "@/lib/mock-data";
+import {
+  createAdminUserApi,
+  deleteAdminUserApi,
+  fetchAdminUsers,
+  type UiEmployee,
+} from "@/lib/api";
 import {
   Table,
   TableBody,
@@ -48,19 +54,37 @@ const employeeSchema = z.object({
 });
 
 function StoreAdminPage() {
+  const auth = useAuth();
   const store = stores[0];
-  const [employees, setEmployees] = useState([
-    { id: "e1", name: "Asha Menon", phone: "+91 98800 22221", role: "store_admin" as const },
-    { id: "e2", name: "Vikram Rao", phone: "+91 98800 22222", role: "employee" as const },
-  ]);
+  const [employees, setEmployees] = useState<UiEmployee[]>([]);
   const [draft, setDraft] = useState({
     name: "",
     phone: "",
     role: "employee" as "employee" | "store_admin",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [savingEmployee, setSavingEmployee] = useState(false);
 
-  const addEmployee = () => {
+  useEffect(() => {
+    const token = auth?.accessToken;
+    if (!token) return;
+    setLoadingEmployees(true);
+    fetchAdminUsers(token)
+      .then((list) => setEmployees(list))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : "Failed to load employees";
+        toast.error(msg);
+      })
+      .finally(() => setLoadingEmployees(false));
+  }, [auth?.accessToken]);
+
+  const addEmployee = async () => {
+    const token = auth?.accessToken;
+    if (!token) {
+      toast.error("Please sign in again.");
+      return;
+    }
     const r = employeeSchema.safeParse(draft);
     if (!r.success) {
       const e: Record<string, string> = {};
@@ -69,9 +93,34 @@ function StoreAdminPage() {
       return;
     }
     setErrors({});
-    setEmployees((prev) => [...prev, { id: `e${prev.length + 1}`, ...r.data }]);
-    setDraft({ name: "", phone: "", role: "employee" });
-    toast.success("Employee added");
+    setSavingEmployee(true);
+    try {
+      const created = await createAdminUserApi(token, r.data);
+      setEmployees((prev) => [...prev, created]);
+      setDraft({ name: "", phone: "", role: "employee" });
+      toast.success("Employee added");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to add employee";
+      toast.error(msg);
+    } finally {
+      setSavingEmployee(false);
+    }
+  };
+
+  const removeEmployee = async (employee: UiEmployee) => {
+    const token = auth?.accessToken;
+    if (!token) {
+      toast.error("Please sign in again.");
+      return;
+    }
+    try {
+      await deleteAdminUserApi(token, employee.login);
+      setEmployees((p) => p.filter((x) => x.id !== employee.id));
+      toast.success("Employee removed");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to remove employee";
+      toast.error(msg);
+    }
   };
 
   return (
@@ -195,15 +244,19 @@ function StoreAdminPage() {
               <div className="flex items-end">
                 <Button
                   onClick={addEmployee}
+                  disabled={savingEmployee}
                   className="w-full bg-brand-gradient text-primary-foreground hover:opacity-95"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Add
+                  {savingEmployee ? "Adding..." : "Add"}
                 </Button>
               </div>
             </div>
 
             <div className="divide-y divide-white/40 rounded-lg border border-white/40 bg-white/30">
+              {loadingEmployees && (
+                <div className="p-3 text-sm text-muted-foreground">Loading employees...</div>
+              )}
               {employees.map((e) => (
                 <div key={e.id} className="flex items-center gap-3 p-3">
                   <ShieldCheck className="h-4 w-4 text-success" />
@@ -217,7 +270,7 @@ function StoreAdminPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setEmployees((p) => p.filter((x) => x.id !== e.id))}
+                    onClick={() => removeEmployee(e)}
                     aria-label="Remove"
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />

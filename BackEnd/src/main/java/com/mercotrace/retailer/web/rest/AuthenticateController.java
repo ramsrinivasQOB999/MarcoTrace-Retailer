@@ -7,6 +7,10 @@ import static com.mercotrace.retailer.security.SecurityUtils.USER_ID_CLAIM;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mercotrace.retailer.security.DomainUserDetailsService.UserWithId;
 import com.mercotrace.retailer.web.rest.vm.LoginVM;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.Instant;
@@ -55,6 +59,16 @@ public class AuthenticateController {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
+    @Operation(
+        summary = "Authenticate and issue JWT",
+        description = "Accepts username/password credentials and returns JWT in both `Authorization` response header and `id_token` JSON field."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Authentication successful",
+        content = @Content(schema = @Schema(implementation = JWTToken.class))
+    )
+    @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content)
     @PostMapping("/authenticate")
     public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM) {
         var authenticationToken = new UsernamePasswordAuthenticationToken(loginVM.getUsername(), loginVM.getPassword());
@@ -73,6 +87,9 @@ public class AuthenticateController {
      * @return the {@link ResponseEntity} with status {@code 204 (No Content)},
      * or with status {@code 401 (Unauthorized)} if not authenticated.
      */
+    @Operation(summary = "Check current authentication state", description = "Returns 204 when authenticated, otherwise 401.")
+    @ApiResponse(responseCode = "204", description = "Authenticated", content = @Content)
+    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
     @GetMapping("/authenticate")
     public ResponseEntity<Void> isAuthenticated(Principal principal) {
         LOG.debug("REST request to check if the current user is authenticated");
@@ -107,8 +124,10 @@ public class AuthenticateController {
     /**
      * Object to return as body in JWT Authentication.
      */
+    @Schema(name = "JwtTokenResponse", description = "JWT body returned from POST /api/authenticate.")
     static class JWTToken {
 
+        @Schema(example = "eyJhbGciOiJIUzI1NiJ9...", requiredMode = Schema.RequiredMode.REQUIRED)
         private String idToken;
 
         JWTToken(String idToken) {

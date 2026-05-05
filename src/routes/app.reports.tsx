@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth-store";
+import { fetchInventoryLots, fetchSaleLines, fetchSales, fetchStores, getApiBaseUrl } from "@/lib/api";
 
 import { withPerm } from "@/components/with-perm";
 
@@ -23,17 +27,56 @@ export const Route = createFileRoute("/app/reports")({
 });
 
 function ReportsPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
+  const queryClient = useQueryClient();
+
+  const storesQuery = useQuery({
+    queryKey: ["stores", token],
+    queryFn: () => fetchStores(token!),
+    enabled: Boolean(token),
+  });
+  const lotsQuery = useQuery({
+    queryKey: ["inventory-lots", token],
+    queryFn: () => fetchInventoryLots(token!),
+    enabled: Boolean(token),
+  });
+  const salesQuery = useQuery({
+    queryKey: ["sales", token],
+    queryFn: () => fetchSales(token!),
+    enabled: Boolean(token),
+  });
+  const saleLinesQuery = useQuery({
+    queryKey: ["sale-lines", token],
+    queryFn: () => fetchSaleLines(token!),
+    enabled: Boolean(token),
+  });
+
+  const storesData = token ? (storesQuery.data ?? []) : stores;
+  const lotsData = token ? (lotsQuery.data ?? []) : lots;
+  const salesData = token ? (salesQuery.data ?? []) : sales;
+  const saleLines = token ? (saleLinesQuery.data ?? []) : [];
+
+  const itemCountBySaleId = useMemo(() => {
+    const counts = new Map<string, number>();
+    saleLines.forEach((line) => {
+      const saleId = String(line.sale.id);
+      counts.set(saleId, (counts.get(saleId) ?? 0) + Number(line.qty ?? 0));
+    });
+    return counts;
+  }, [saleLines]);
+
   const supplierAgg = new Map<string, { value: number; lots: number }>();
-  lots.forEach((l) => {
+  lotsData.forEach((l) => {
     const cur = supplierAgg.get(l.supplier) ?? { value: 0, lots: 0 };
     cur.value += l.costPrice * l.qty;
     cur.lots += 1;
     supplierAgg.set(l.supplier, cur);
   });
 
-  const storePerf = stores.map((s) => {
-    const storeLots = lots.filter((l) => l.storeId === s.id);
-    const storeSales = sales.filter((sa) => sa.storeId === s.id);
+  const storePerf = storesData.map((s) => {
+    const storeLots = lotsData.filter((l) => l.storeId === s.id);
+    const storeSales = salesData.filter((sa) => sa.storeId === s.id);
     return {
       ...s,
       capital: storeLots.reduce((a, l) => a + l.costPrice * l.remaining, 0),
@@ -42,22 +85,63 @@ function ReportsPage() {
     };
   });
 
+  const onExport = async () => {
+    try {
+      if (token) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["sales", token] }),
+          queryClient.invalidateQueries({ queryKey: ["sale-lines", token] }),
+          queryClient.invalidateQueries({ queryKey: ["stores", token] }),
+        ]);
+      }
+
+      const csvRows = [
+        ["billNo", "storeCode", "items", "payment", "total"],
+        ...salesData.map((s) => [
+          s.billNo,
+          storesData.find((st) => st.id === s.storeId)?.code ?? "",
+          String(token ? (itemCountBySaleId.get(s.id) ?? 0) : s.items.length),
+          s.payment,
+          String(s.total),
+        ]),
+      ];
+      const csv = csvRows.map((row) => row.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = `reports-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(href);
+      toast.success("Report exported", {
+        description: token ? "CSV generated from live backend data" : "CSV generated from preview data",
+      });
+    } catch (e) {
+      toast.error("Export failed", { description: e instanceof Error ? e.message : String(e) });
+    }
+  };
+
   return (
     <>
       <PageHeader
         title="Reports"
         subtitle="Daily summary, inventory health, supplier comparison, store performance"
         actions={
-          <Button
-            variant="outline"
-            onClick={() =>
-              toast.success("Export queued", { description: "CSV will download (demo)" })
-            }
-          >
+          <Button variant="outline" onClick={onExport}>
             <Download className="h-4 w-4 mr-1" /> Export
           </Button>
         }
       />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {(salesQuery.isFetching || lotsQuery.isFetching || storesQuery.isFetching || saleLinesQuery.isFetching)
+            ? " · Loading…"
+            : ""}
+        </p>
+      )}
 
       <Tabs defaultValue="daily">
         <TabsList className="flex-wrap">
@@ -80,11 +164,11 @@ function ReportsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sales.map((s) => (
+                {salesData.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell className="font-mono text-xs">{s.billNo}</TableCell>
-                    <TableCell>{stores.find((st) => st.id === s.storeId)?.code}</TableCell>
-                    <TableCell>{s.items.length}</TableCell>
+                    <TableCell>{storesData.find((st) => st.id === s.storeId)?.code}</TableCell>
+                    <TableCell>{token ? (itemCountBySaleId.get(s.id) ?? 0) : s.items.length}</TableCell>
                     <TableCell className="capitalize">{s.payment}</TableCell>
                     <TableCell className="text-right font-medium">{inr(s.total)}</TableCell>
                   </TableRow>
@@ -107,12 +191,12 @@ function ReportsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lots.map((l) => {
+                {lotsData.map((l) => {
                   const h = healthForLot(l);
                   return (
                     <TableRow key={l.id}>
                       <TableCell className="font-mono text-xs">{l.skuCode}</TableCell>
-                      <TableCell>{stores.find((s) => s.id === l.storeId)?.code}</TableCell>
+                      <TableCell>{storesData.find((s) => s.id === l.storeId)?.code}</TableCell>
                       <TableCell>{l.remaining}</TableCell>
                       <TableCell>{inr(h.effCost)}</TableCell>
                       <TableCell className={h.margin < 0 ? "text-destructive" : "text-success"}>

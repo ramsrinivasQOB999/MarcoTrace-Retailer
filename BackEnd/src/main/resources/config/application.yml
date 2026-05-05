@@ -95,7 +95,8 @@ spring:
     name: mercotraceRetailer
   docker:
     compose:
-      enabled: true
+      # Dev uses local PostgreSQL; enable if starting deps via Docker (see BackEnd/README.md).
+      enabled: false
       lifecycle-management: start-only
       file: src/main/docker/services.yml
   profiles:
@@ -176,6 +177,7 @@ server:
 springdoc:
   show-actuator: true
   swagger-ui:
+    custom-js: /swagger-custom.js
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none

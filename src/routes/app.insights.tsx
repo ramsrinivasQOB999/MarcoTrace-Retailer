@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { lots, stores, healthForLot, inr } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-store";
+import { fetchInventoryLots, fetchStores, getApiBaseUrl } from "@/lib/api";
 import {
   ResponsiveContainer,
   BarChart,
@@ -25,13 +28,28 @@ export const Route = createFileRoute("/app/insights")({
 });
 
 function InsightsPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
+  const storesQuery = useQuery({
+    queryKey: ["stores", token],
+    queryFn: () => fetchStores(token!),
+    enabled: Boolean(token),
+  });
+  const lotsQuery = useQuery({
+    queryKey: ["inventory-lots", token],
+    queryFn: () => fetchInventoryLots(token!),
+    enabled: Boolean(token),
+  });
+  const storesData = token ? (storesQuery.data ?? []) : stores;
+  const lotsData = token ? (lotsQuery.data ?? []) : lots;
+
   const aging = [
     { bucket: "0-30d", value: 0 },
     { bucket: "31-60d", value: 0 },
     { bucket: "61-90d", value: 0 },
     { bucket: "90d+", value: 0 },
   ];
-  lots.forEach((l) => {
+  lotsData.forEach((l) => {
     const days = healthForLot(l).daysHeld;
     const v = l.costPrice * l.remaining;
     if (days <= 30) aging[0].value += v;
@@ -42,11 +60,11 @@ function InsightsPage() {
 
   const healthDist = ["green", "yellow", "red"].map((tone) => ({
     name: tone === "green" ? "Healthy" : tone === "yellow" ? "At risk" : "Loss",
-    value: lots.filter((l) => healthForLot(l).tone === tone).length,
+    value: lotsData.filter((l) => healthForLot(l).tone === tone).length,
     color: tone === "green" ? "#22C55E" : tone === "yellow" ? "#F59E0B" : "#EF4444",
   }));
 
-  const flagged = lots
+  const flagged = lotsData
     .map((l) => ({ l, h: healthForLot(l) }))
     .filter((x) => x.h.tone !== "green")
     .sort((a, b) => a.h.margin - b.h.margin);
@@ -54,6 +72,12 @@ function InsightsPage() {
   return (
     <>
       <PageHeader title="Inventory Insights" subtitle="Aging, capital lock, profitability & risk" />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {storesQuery.isFetching || lotsQuery.isFetching ? " · Loading…" : ""}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="glass-card p-5 lg:col-span-2">
@@ -102,7 +126,7 @@ function InsightsPage() {
             <div className="text-sm text-muted-foreground">All lots healthy 🎉</div>
           )}
           {flagged.map(({ l, h }) => {
-            const store = stores.find((s) => s.id === l.storeId);
+            const store = storesData.find((s) => s.id === l.storeId);
             return (
               <div
                 key={l.id}

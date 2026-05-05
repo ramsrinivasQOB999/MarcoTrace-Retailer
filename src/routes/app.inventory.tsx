@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { lots, stores, healthForLot, inr } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-store";
+import { fetchInventoryLots, fetchStores, getApiBaseUrl } from "@/lib/api";
 import { StatusBadge } from "@/components/status-badge";
 import { Search } from "lucide-react";
 
@@ -25,20 +28,34 @@ export const Route = createFileRoute("/app/inventory")({
 });
 
 function InventoryPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
   const [q, setQ] = useState("");
   const [rate, setRate] = useState(12);
+  const storesQuery = useQuery({
+    queryKey: ["stores", token],
+    queryFn: () => fetchStores(token!),
+    enabled: Boolean(token),
+  });
+  const lotsQuery = useQuery({
+    queryKey: ["inventory-lots", token],
+    queryFn: () => fetchInventoryLots(token!),
+    enabled: Boolean(token),
+  });
+  const storesData = token ? (storesQuery.data ?? []) : stores;
+  const lotsData = token ? (lotsQuery.data ?? []) : lots;
 
   const rows = useMemo(() => {
-    return lots
+    return lotsData
       .filter((l) =>
         [l.skuCode, l.invoiceNo, l.supplier].join(" ").toLowerCase().includes(q.toLowerCase()),
       )
       .map((l) => {
         const h = healthForLot(l, rate);
-        const store = stores.find((s) => s.id === l.storeId);
+        const store = storesData.find((s) => s.id === l.storeId);
         return { l, h, store };
       });
-  }, [q, rate]);
+  }, [q, rate, lotsData, storesData]);
 
   const greens = rows.filter((r) => r.h.tone === "green").length;
   const yellows = rows.filter((r) => r.h.tone === "yellow").length;
@@ -50,6 +67,12 @@ function InventoryPage() {
         title="Inventory engine"
         subtitle="Lot-level tracking with interest, wastage & effective margin"
       />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {storesQuery.isFetching || lotsQuery.isFetching ? " · Loading…" : ""}
+        </p>
+      )}
 
       <div className="grid grid-cols-3 gap-4">
         <Card className="glass-card p-4">
