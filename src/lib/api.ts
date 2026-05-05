@@ -1,4 +1,4 @@
-import type { Store } from "@/lib/mock-data";
+import type { Lot, Sale, SKU, Store } from "@/lib/mock-data";
 import type { Role } from "@/lib/mock-data";
 
 const FALLBACK_DIRECT_API = "http://localhost:8090";
@@ -264,4 +264,352 @@ export async function deleteAdminUserApi(token: string, login: string): Promise<
   if (!res.ok) {
     throw new Error((await res.text()) || `Delete employee failed (${res.status})`);
   }
+}
+
+export type ApiSkuDTO = {
+  id: number;
+  code: string;
+  name: string;
+  category: string | null;
+  hsn: string | null;
+  gst: number | null;
+  unit: string | null;
+  active: boolean | null;
+  basePrice: number;
+};
+
+function mapApiSkuToSku(dto: ApiSkuDTO): SKU {
+  return {
+    id: String(dto.id),
+    code: dto.code,
+    name: dto.name,
+    category: dto.category ?? "",
+    hsn: dto.hsn ?? "",
+    gst: dto.gst ?? 0,
+    unit: dto.unit ?? "unit",
+    active: dto.active ?? true,
+    basePrice: Number(dto.basePrice ?? 0),
+  };
+}
+
+export async function fetchSkus(token: string): Promise<SKU[]> {
+  const res = await fetch(
+    requestUrl("/api/skus?size=500&sort=id,desc"),
+    apiFetchInit({
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  if (!res.ok) {
+    throw new Error(`SKUs request failed (${res.status})`);
+  }
+  const list = (await res.json()) as ApiSkuDTO[];
+  return list.map(mapApiSkuToSku);
+}
+
+export async function createSkuApi(
+  token: string,
+  payload: {
+    code: string;
+    name: string;
+    category: string;
+    hsn: string;
+    gst: number;
+    unit: string;
+    basePrice: number;
+  },
+): Promise<SKU> {
+  const res = await fetch(
+    requestUrl("/api/skus"),
+    apiFetchInit({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        ...payload,
+        active: true,
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Create SKU failed (${res.status})`);
+  }
+  return mapApiSkuToSku((await res.json()) as ApiSkuDTO);
+}
+
+export async function updateSkuApi(
+  token: string,
+  sku: SKU,
+): Promise<SKU> {
+  const res = await fetch(
+    requestUrl(`/api/skus/${encodeURIComponent(sku.id)}`),
+    apiFetchInit({
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: Number(sku.id),
+        code: sku.code,
+        name: sku.name,
+        category: sku.category,
+        hsn: sku.hsn,
+        gst: sku.gst,
+        unit: sku.unit,
+        active: sku.active,
+        basePrice: sku.basePrice,
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Update SKU failed (${res.status})`);
+  }
+  return mapApiSkuToSku((await res.json()) as ApiSkuDTO);
+}
+
+export type ApiInventoryLotDTO = {
+  id: number;
+  qty: number;
+  remaining: number;
+  costPrice: number;
+  sellPrice: number;
+  purchaseDate: string;
+  expiryDate: string;
+  supplier: string | null;
+  invoiceNo: string | null;
+  sku: ApiSkuDTO;
+  store: ApiStoreDTO;
+};
+
+function mapApiInventoryLotToLot(dto: ApiInventoryLotDTO): Lot {
+  return {
+    id: String(dto.id),
+    skuId: String(dto.sku.id),
+    skuCode: dto.sku.code,
+    storeId: String(dto.store.id),
+    qty: dto.qty,
+    remaining: dto.remaining,
+    costPrice: Number(dto.costPrice),
+    sellPrice: Number(dto.sellPrice),
+    purchaseDate: dto.purchaseDate,
+    expiryDate: dto.expiryDate,
+    supplier: dto.supplier ?? "",
+    invoiceNo: dto.invoiceNo ?? "",
+  };
+}
+
+export async function fetchInventoryLots(token: string): Promise<Lot[]> {
+  const res = await fetch(
+    requestUrl("/api/inventory-lots?size=2000&sort=id,desc"),
+    apiFetchInit({
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  if (!res.ok) {
+    throw new Error(`Inventory lots request failed (${res.status})`);
+  }
+  const list = (await res.json()) as ApiInventoryLotDTO[];
+  return list.map(mapApiInventoryLotToLot);
+}
+
+export async function createInventoryLotApi(
+  token: string,
+  payload: {
+    qty: number;
+    remaining: number;
+    costPrice: number;
+    sellPrice: number;
+    purchaseDate: string;
+    expiryDate: string;
+    supplier: string;
+    invoiceNo: string;
+    skuId: number;
+    storeId: number;
+  },
+): Promise<Lot> {
+  const res = await fetch(
+    requestUrl("/api/inventory-lots"),
+    apiFetchInit({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        qty: payload.qty,
+        remaining: payload.remaining,
+        costPrice: payload.costPrice,
+        sellPrice: payload.sellPrice,
+        purchaseDate: payload.purchaseDate,
+        expiryDate: payload.expiryDate,
+        supplier: payload.supplier,
+        invoiceNo: payload.invoiceNo,
+        sku: { id: payload.skuId },
+        store: { id: payload.storeId },
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Create inventory lot failed (${res.status})`);
+  }
+  return mapApiInventoryLotToLot((await res.json()) as ApiInventoryLotDTO);
+}
+
+export async function updateInventoryLotApi(
+  token: string,
+  lot: Lot,
+): Promise<Lot> {
+  const res = await fetch(
+    requestUrl(`/api/inventory-lots/${encodeURIComponent(lot.id)}`),
+    apiFetchInit({
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: Number(lot.id),
+        qty: lot.qty,
+        remaining: lot.remaining,
+        costPrice: lot.costPrice,
+        sellPrice: lot.sellPrice,
+        purchaseDate: lot.purchaseDate,
+        expiryDate: lot.expiryDate,
+        supplier: lot.supplier,
+        invoiceNo: lot.invoiceNo,
+        sku: { id: Number(lot.skuId) },
+        store: { id: Number(lot.storeId) },
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Update inventory lot failed (${res.status})`);
+  }
+  return mapApiInventoryLotToLot((await res.json()) as ApiInventoryLotDTO);
+}
+
+export type ApiSaleDTO = {
+  id: number;
+  billNo: string;
+  date: string;
+  total: number;
+  gst: number;
+  payment: "CASH" | "UPI" | "CARD";
+  store: ApiStoreDTO;
+};
+
+export type ApiSaleLineDTO = {
+  id: number;
+  qty: number;
+  price: number;
+  sale: ApiSaleDTO;
+  sku: ApiSkuDTO;
+};
+
+function mapApiSaleToSale(dto: ApiSaleDTO): Sale {
+  return {
+    id: String(dto.id),
+    billNo: dto.billNo,
+    storeId: String(dto.store.id),
+    date: dto.date,
+    items: [],
+    total: Number(dto.total),
+    gst: Number(dto.gst),
+    payment: dto.payment.toLowerCase() as Sale["payment"],
+  };
+}
+
+export async function fetchSales(token: string): Promise<Sale[]> {
+  const res = await fetch(
+    requestUrl("/api/sales?size=1000&sort=id,desc"),
+    apiFetchInit({
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  if (!res.ok) {
+    throw new Error(`Sales request failed (${res.status})`);
+  }
+  const list = (await res.json()) as ApiSaleDTO[];
+  return list.map(mapApiSaleToSale);
+}
+
+export async function fetchSaleLines(token: string): Promise<ApiSaleLineDTO[]> {
+  const res = await fetch(
+    requestUrl("/api/sale-lines?size=5000&sort=id,desc"),
+    apiFetchInit({
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  if (!res.ok) {
+    throw new Error(`Sale lines request failed (${res.status})`);
+  }
+  return (await res.json()) as ApiSaleLineDTO[];
+}
+
+export async function createSaleApi(
+  token: string,
+  payload: {
+    billNo: string;
+    date: string;
+    total: number;
+    gst: number;
+    payment: "CASH" | "UPI" | "CARD";
+    storeId: number;
+  },
+): Promise<Sale> {
+  const res = await fetch(
+    requestUrl("/api/sales"),
+    apiFetchInit({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        billNo: payload.billNo,
+        date: payload.date,
+        total: payload.total,
+        gst: payload.gst,
+        payment: payload.payment,
+        store: { id: payload.storeId },
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Create sale failed (${res.status})`);
+  }
+  return mapApiSaleToSale((await res.json()) as ApiSaleDTO);
+}
+
+export async function createSaleLineApi(
+  token: string,
+  payload: {
+    qty: number;
+    price: number;
+    saleId: number;
+    skuId: number;
+  },
+): Promise<ApiSaleLineDTO> {
+  const res = await fetch(
+    requestUrl("/api/sale-lines"),
+    apiFetchInit({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        qty: payload.qty,
+        price: payload.price,
+        sale: { id: payload.saleId },
+        sku: { id: payload.skuId },
+      }),
+    }),
+  );
+  if (!res.ok) {
+    throw new Error((await res.text()) || `Create sale line failed (${res.status})`);
+  }
+  return (await res.json()) as ApiSaleLineDTO;
 }

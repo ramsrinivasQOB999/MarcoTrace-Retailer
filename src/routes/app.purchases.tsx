@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,6 +18,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { lots as seedLots, stores, skus, type Lot, inr } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-store";
+import {
+  createInventoryLotApi,
+  fetchInventoryLots,
+  fetchSkus,
+  fetchStores,
+  getApiBaseUrl,
+} from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -68,10 +77,34 @@ const purchaseSchema = z.object({
 type PurchaseForm = z.infer<typeof purchaseSchema>;
 
 function PurchasesPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
+  const queryClient = useQueryClient();
   const [lots, setLots] = useState<Lot[]>(seedLots);
   const [open, setOpen] = useState(false);
-  const [usedInvoices, setUsedInvoices] = useState<Set<string>>(
-    new Set(seedLots.map((l) => l.invoiceNo)),
+
+  const storesQuery = useQuery({
+    queryKey: ["stores", token],
+    queryFn: () => fetchStores(token!),
+    enabled: Boolean(token),
+  });
+  const skusQuery = useQuery({
+    queryKey: ["skus", token],
+    queryFn: () => fetchSkus(token!),
+    enabled: Boolean(token),
+  });
+  const lotsQuery = useQuery({
+    queryKey: ["inventory-lots", token],
+    queryFn: () => fetchInventoryLots(token!),
+    enabled: Boolean(token),
+  });
+
+  const storesData = token ? (storesQuery.data ?? []) : stores;
+  const skusData = token ? (skusQuery.data ?? []) : skus;
+  const lotsData = token ? (lotsQuery.data ?? []) : lots;
+  const usedInvoices = useMemo(
+    () => new Set(lotsData.map((l) => l.invoiceNo.toUpperCase())),
+    [lotsData],
   );
 
   const form = useForm<PurchaseForm>({
@@ -79,11 +112,11 @@ function PurchasesPage() {
     defaultValues: {
       invoiceNo: "",
       supplier: "",
-      storeId: stores[0].id,
+      storeId: stores[0]?.id ?? "",
       invoiceDate: format(new Date(), "yyyy-MM-dd"),
       items: [
         {
-          skuId: skus[0].id,
+          skuId: skus[0]?.id ?? "",
           qty: 1,
           costPrice: 0,
           sellPrice: 0,
@@ -94,32 +127,71 @@ function PurchasesPage() {
   });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" });
 
-  const onSubmit = (data: PurchaseForm) => {
+  useEffect(() => {
+    if (storesData.length && !storesData.some((s) => s.id === form.getValues("storeId"))) {
+      form.setValue("storeId", storesData[0].id);
+    }
+    if (
+      skusData.length &&
+      !skusData.some((s) => s.id === form.getValues("items.0.skuId"))
+    ) {
+      form.setValue("items.0.skuId", skusData[0].id);
+    }
+  }, [storesData, skusData, form]);
+
+  const onSubmit = async (data: PurchaseForm) => {
     if (usedInvoices.has(data.invoiceNo.toUpperCase())) {
       toast.error("Duplicate invoice", { description: `${data.invoiceNo} already exists` });
       return;
     }
-    const newLots: Lot[] = data.items.map((it, idx) => {
-      const sku = skus.find((s) => s.id === it.skuId)!;
-      return {
-        id: `l${Date.now()}-${idx}`,
-        skuId: sku.id,
-        skuCode: sku.code,
-        storeId: data.storeId,
-        qty: it.qty,
-        remaining: it.qty,
-        costPrice: it.costPrice,
-        sellPrice: it.sellPrice,
-        purchaseDate: new Date(data.invoiceDate).toISOString(),
-        expiryDate: new Date(it.expiryDate).toISOString(),
-        supplier: data.supplier,
-        invoiceNo: data.invoiceNo.toUpperCase(),
-      };
-    });
-    setLots((p) => [...newLots, ...p]);
-    setUsedInvoices((p) => new Set(p).add(data.invoiceNo.toUpperCase()));
+    const invoiceNo = data.invoiceNo.toUpperCase();
+    if (token) {
+      try {
+        await Promise.all(
+          data.items.map(async (it) => {
+            await createInventoryLotApi(token, {
+              qty: it.qty,
+              remaining: it.qty,
+              costPrice: it.costPrice,
+              sellPrice: it.sellPrice,
+              purchaseDate: new Date(data.invoiceDate).toISOString(),
+              expiryDate: new Date(it.expiryDate).toISOString(),
+              supplier: data.supplier,
+              invoiceNo,
+              skuId: Number(it.skuId),
+              storeId: Number(data.storeId),
+            });
+          }),
+        );
+        await queryClient.invalidateQueries({ queryKey: ["inventory-lots", token] });
+      } catch (e) {
+        toast.error("Could not book inward", {
+          description: e instanceof Error ? e.message : String(e),
+        });
+        return;
+      }
+    } else {
+      const newLots: Lot[] = data.items.map((it, idx) => {
+        const sku = skusData.find((s) => s.id === it.skuId)!;
+        return {
+          id: `l${Date.now()}-${idx}`,
+          skuId: sku.id,
+          skuCode: sku.code,
+          storeId: data.storeId,
+          qty: it.qty,
+          remaining: it.qty,
+          costPrice: it.costPrice,
+          sellPrice: it.sellPrice,
+          purchaseDate: new Date(data.invoiceDate).toISOString(),
+          expiryDate: new Date(it.expiryDate).toISOString(),
+          supplier: data.supplier,
+          invoiceNo,
+        };
+      });
+      setLots((p) => [...newLots, ...p]);
+    }
     toast.success("Inward booked", {
-      description: `${newLots.length} lot(s) created from ${data.invoiceNo}`,
+      description: `${data.items.length} lot(s) created from ${data.invoiceNo}`,
     });
     setOpen(false);
     form.reset();
@@ -127,7 +199,7 @@ function PurchasesPage() {
 
   const grouped = useMemo(() => {
     const map = new Map<string, Lot[]>();
-    lots.forEach((l) => {
+    lotsData.forEach((l) => {
       const arr = map.get(l.invoiceNo) ?? [];
       arr.push(l);
       map.set(l.invoiceNo, arr);
@@ -135,7 +207,7 @@ function PurchasesPage() {
     return Array.from(map.entries()).sort((a, b) =>
       b[1][0].purchaseDate > a[1][0].purchaseDate ? 1 : -1,
     );
-  }, [lots]);
+  }, [lotsData]);
 
   return (
     <>
@@ -183,7 +255,7 @@ function PurchasesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {stores.map((s) => (
+                        {storesData.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
                             {s.code} — {s.name}
                           </SelectItem>
@@ -206,7 +278,7 @@ function PurchasesPage() {
                       size="sm"
                       onClick={() =>
                         append({
-                          skuId: skus[0].id,
+                          skuId: skusData[0]?.id ?? "",
                           qty: 1,
                           costPrice: 0,
                           sellPrice: 0,
@@ -233,7 +305,7 @@ function PurchasesPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {skus.map((s) => (
+                              {skusData.map((s) => (
                                 <SelectItem key={s.id} value={s.id}>
                                   {s.name}
                                 </SelectItem>
@@ -293,6 +365,12 @@ function PurchasesPage() {
           </Dialog>
         }
       />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {storesQuery.isFetching || skusQuery.isFetching || lotsQuery.isFetching ? " · Loading…" : ""}
+        </p>
+      )}
 
       <Card className="glass-card p-4">
         <div className="overflow-x-auto">
@@ -309,7 +387,7 @@ function PurchasesPage() {
             </TableHeader>
             <TableBody>
               {grouped.map(([inv, items]) => {
-                const store = stores.find((s) => s.id === items[0].storeId);
+                const store = storesData.find((s) => s.id === items[0].storeId);
                 const value = items.reduce((s, l) => s + l.costPrice * l.qty, 0);
                 return (
                   <TableRow key={inv}>

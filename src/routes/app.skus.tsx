@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,6 +19,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { skus as seedSkus, type SKU, inr } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-store";
+import { createSkuApi, fetchSkus, getApiBaseUrl, updateSkuApi } from "@/lib/api";
 import { StatusBadge } from "@/components/status-badge";
 import {
   Dialog,
@@ -81,9 +84,18 @@ const skuSchema = z.object({
 type SKUForm = z.infer<typeof skuSchema>;
 
 function SKUsPage() {
+  const user = useAuth();
+  const token = user?.accessToken;
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<SKU[]>(seedSkus);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const skusQuery = useQuery({
+    queryKey: ["skus", token],
+    queryFn: () => fetchSkus(token!),
+    enabled: Boolean(token),
+  });
+  const rows = token ? (skusQuery.data ?? []) : items;
   const form = useForm<SKUForm>({
     resolver: zodResolver(skuSchema),
     defaultValues: {
@@ -101,33 +113,62 @@ function SKUsPage() {
 
   const filtered = useMemo(
     () =>
-      items.filter((s) =>
+      rows.filter((s) =>
         [s.code, s.name, s.category].join(" ").toLowerCase().includes(q.toLowerCase()),
       ),
-    [items, q],
+    [rows, q],
   );
 
-  const onAdd = (data: SKUForm) => {
-    const seq = String(items.length + 1).padStart(3, "0");
+  const onAdd = async (data: SKUForm) => {
+    const seq = String(rows.length + 1).padStart(3, "0");
     const code = `${data.category.toUpperCase()}-${data.type.toUpperCase()}-${data.group.toUpperCase()}-${data.pack.toUpperCase()}-${seq}`;
-    const sku: SKU = {
-      id: `k${Date.now()}`,
-      code,
-      name: data.name,
-      category: data.category.toUpperCase(),
-      hsn: data.hsn,
-      gst: Number(data.gst),
-      unit: data.unit,
-      active: true,
-      basePrice: Number(data.basePrice),
-    };
-    setItems((p) => [sku, ...p]);
+    if (token) {
+      try {
+        await createSkuApi(token, {
+          code,
+          name: data.name,
+          category: data.category.toUpperCase(),
+          hsn: data.hsn,
+          gst: Number(data.gst),
+          unit: data.unit,
+          basePrice: Number(data.basePrice),
+        });
+        await queryClient.invalidateQueries({ queryKey: ["skus", token] });
+      } catch (e) {
+        toast.error("Could not create SKU", { description: e instanceof Error ? e.message : String(e) });
+        return;
+      }
+    } else {
+      const sku: SKU = {
+        id: `k${Date.now()}`,
+        code,
+        name: data.name,
+        category: data.category.toUpperCase(),
+        hsn: data.hsn,
+        gst: Number(data.gst),
+        unit: data.unit,
+        active: true,
+        basePrice: Number(data.basePrice),
+      };
+      setItems((p) => [sku, ...p]);
+    }
     toast.success("SKU created", { description: code });
     setOpen(false);
     form.reset();
   };
 
-  const toggle = (id: string) => {
+  const toggle = async (id: string) => {
+    if (token) {
+      const current = rows.find((s) => s.id === id);
+      if (!current) return;
+      try {
+        await updateSkuApi(token, { ...current, active: !current.active });
+        await queryClient.invalidateQueries({ queryKey: ["skus", token] });
+      } catch (e) {
+        toast.error("Could not update SKU", { description: e instanceof Error ? e.message : String(e) });
+      }
+      return;
+    }
     setItems((p) => p.map((s) => (s.id === id ? { ...s, active: !s.active } : s)));
   };
 
@@ -225,6 +266,12 @@ function SKUsPage() {
           </Dialog>
         }
       />
+      {token && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Connected to <span className="font-mono">{getApiBaseUrl()}</span>
+          {skusQuery.isFetching ? " · Loading…" : ""}
+        </p>
+      )}
 
       <Card className="glass-card p-4">
         <div className="relative max-w-sm mb-3">
