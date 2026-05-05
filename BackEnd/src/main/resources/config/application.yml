@@ -177,6 +177,7 @@ server:
 springdoc:
   show-actuator: true
   swagger-ui:
+    custom-js: /swagger-custom.js
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
