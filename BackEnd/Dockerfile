@@ -23,4 +23,4 @@ COPY --from=build /app/application.jar ./application.jar
 
 # Render sets PORT; Spring must listen on it.
 ENV JAVA_OPTS=""
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/application.jar --spring.profiles.active=prod --server.port=${PORT:-8080}"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/application.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} --server.port=${PORT:-8080}"]
