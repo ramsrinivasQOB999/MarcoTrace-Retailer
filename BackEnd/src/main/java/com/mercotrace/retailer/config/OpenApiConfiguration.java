@@ -59,8 +59,8 @@ public class OpenApiConfiguration {
 
             openApi.setServers(
                 List.of(
-                    new Server().url("http://localhost:8090").description("Local Spring Boot (application-dev default port)"),
-                    new Server().url("/").description("Same host as this server")
+                    new Server().url("/").description("Current deployed host"),
+                    new Server().url("http://localhost:8090").description("Local Spring Boot (application-dev default port)")
                 )
             );
 
