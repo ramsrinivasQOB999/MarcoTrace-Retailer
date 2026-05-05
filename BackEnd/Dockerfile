@@ -6,6 +6,7 @@ WORKDIR /app
 
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
+COPY sonar-project.properties ./
 RUN chmod +x mvnw
 
 COPY src src

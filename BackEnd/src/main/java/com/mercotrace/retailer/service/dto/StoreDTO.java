@@ -1,6 +1,7 @@
 package com.mercotrace.retailer.service.dto;
 
 import com.mercotrace.retailer.domain.enumeration.StoreStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -9,25 +10,34 @@ import java.util.Objects;
  * A DTO for the {@link com.mercotrace.retailer.domain.Store} entity.
  */
 @SuppressWarnings("common-java:DuplicatedBlocks")
+@Schema(name = "Store", description = "Store payload used by /api/stores endpoints.")
 public class StoreDTO implements Serializable {
 
+    @Schema(example = "42", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
     @NotNull
+    @Schema(example = "STR-CHN-001", requiredMode = Schema.RequiredMode.REQUIRED)
     private String code;
 
     @NotNull
+    @Schema(example = "Mercotrace Anna Nagar", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
+    @Schema(example = "Chennai")
     private String city;
 
+    @Schema(example = "North Chennai")
     private String agglomeration;
 
     @NotNull
+    @Schema(example = "ACTIVE", requiredMode = Schema.RequiredMode.REQUIRED)
     private StoreStatus status;
 
+    @Schema(example = "R. Karthik")
     private String owner;
 
+    @Schema(example = "+91-9000000000")
     private String phone;
 
     public Long getId() {

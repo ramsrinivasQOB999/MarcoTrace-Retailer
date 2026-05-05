@@ -10,6 +10,9 @@ import com.mercotrace.retailer.service.dto.PasswordChangeDTO;
 import com.mercotrace.retailer.web.rest.errors.*;
 import com.mercotrace.retailer.web.rest.vm.KeyAndPasswordVM;
 import com.mercotrace.retailer.web.rest.vm.ManagedUserVM;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +61,9 @@ public class AccountResource {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Register a new user")
+    @ApiResponse(responseCode = "201", description = "Registration accepted")
+    @ApiResponse(responseCode = "400", description = "Validation error, duplicate login/email, or weak password", content = @Content)
     public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
         if (isPasswordLengthInvalid(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
@@ -87,6 +93,9 @@ public class AccountResource {
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user couldn't be returned.
      */
     @GetMapping("/account")
+    @Operation(summary = "Get current user profile")
+    @ApiResponse(responseCode = "200", description = "Current user profile returned")
+    @ApiResponse(responseCode = "401", description = "Missing or invalid JWT", content = @Content)
     public AdminUserDTO getAccount() {
         return userService
             .getUserWithAuthorities()
@@ -102,6 +111,10 @@ public class AccountResource {
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user login wasn't found.
      */
     @PostMapping("/account")
+    @Operation(summary = "Update current user profile")
+    @ApiResponse(responseCode = "200", description = "Profile updated")
+    @ApiResponse(responseCode = "400", description = "Validation error or email already used", content = @Content)
+    @ApiResponse(responseCode = "401", description = "Missing or invalid JWT", content = @Content)
     public void saveAccount(@Valid @RequestBody AdminUserDTO userDTO) {
         String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() ->
             new AccountResourceException("Current user login not found")
@@ -130,6 +143,10 @@ public class AccountResource {
      * @throws InvalidPasswordException {@code 400 (Bad Request)} if the new password is incorrect.
      */
     @PostMapping(path = "/account/change-password")
+    @Operation(summary = "Change current user password")
+    @ApiResponse(responseCode = "200", description = "Password changed")
+    @ApiResponse(responseCode = "400", description = "Weak new password or invalid input", content = @Content)
+    @ApiResponse(responseCode = "401", description = "Missing or invalid JWT", content = @Content)
     public void changePassword(@RequestBody PasswordChangeDTO passwordChangeDto) {
         if (isPasswordLengthInvalid(passwordChangeDto.getNewPassword())) {
             throw new InvalidPasswordException();
@@ -143,6 +160,8 @@ public class AccountResource {
      * @param mail the mail of the user.
      */
     @PostMapping(path = "/account/reset-password/init")
+    @Operation(summary = "Start password reset by email")
+    @ApiResponse(responseCode = "200", description = "Reset flow initiated (always returns success)")
     public void requestPasswordReset(@RequestBody String mail) {
         Optional<User> user = userService.requestPasswordReset(mail);
         if (user.isPresent()) {
@@ -162,6 +181,9 @@ public class AccountResource {
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the password could not be reset.
      */
     @PostMapping(path = "/account/reset-password/finish")
+    @Operation(summary = "Complete password reset using reset key")
+    @ApiResponse(responseCode = "200", description = "Password reset completed")
+    @ApiResponse(responseCode = "400", description = "Invalid reset key or weak password", content = @Content)
     public void finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
         if (isPasswordLengthInvalid(keyAndPassword.getNewPassword())) {
             throw new InvalidPasswordException();
