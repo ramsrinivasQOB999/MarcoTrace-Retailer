@@ -87,6 +87,15 @@ jhipster:
     caffeine: # Caffeine configuration
       time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache. This sets expireAfterWrite in Caffeine (https://github.com/ben-manes/caffeine/wiki/Eviction#time-based)
       max-entries: 1000 # Number of objects in each cache entry
+  cors:
+    # Production frontend domains + wildcard for Vercel preview deployments.
+    allowed-origins: 'https://marco-trace-retailer.vercel.app,https://marco-trace-retailer-oz25.vercel.app'
+    allowed-origin-patterns: 'https://*.vercel.app'
+    allowed-methods: '*'
+    allowed-headers: '*'
+    exposed-headers: 'Authorization,Link,X-Total-Count,X-${jhipster.clientApp.name}-alert,X-${jhipster.clientApp.name}-error,X-${jhipster.clientApp.name}-params'
+    allow-credentials: true
+    max-age: 1800
   security:
     authentication:
       jwt:
